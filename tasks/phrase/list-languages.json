@@ -1,0 +1,3 @@
+{
+  "description": "Lists all languages in the project. The list of languages is determined by reading the ```i18n/phrases[_language].properties``` files from the site directory."
+}

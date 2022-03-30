@@ -1,0 +1,3 @@
+{
+  "description": "Sorts, groups and cleans up the ```i18n/phrases[_language].properties``` files.\n\nThe phrases are grouped in the following way:\n* **Glossary** single word phrases.\n* **Mime types** mime type phrases\n* **Regular phrases** grouped by first segment in the phrase key (**my-part**.label)\n"
+}

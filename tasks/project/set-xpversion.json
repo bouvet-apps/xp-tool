@@ -1,0 +1,3 @@
+{
+  "description": "Sets Enonic XP version number in Dockerfile and gradle.properties. The version list is fetched from enonic/xp-app on Github, so only released and valid veresions are available.\n"
+}

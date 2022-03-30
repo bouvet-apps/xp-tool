@@ -1,0 +1,12 @@
+<!-- @summary[no]:  -->
+<!-- @summary[en]:  -->
+<layout>
+    <display-name i18n="{{displayName_i18n}}">{{displayName}}</display-name>
+    <config>
+    </config>
+    <regions>
+        {{#regions}}
+        <region name="{{name}}" />
+        {{/regions}}
+    </regions>
+</layout>

@@ -1,0 +1,9 @@
+<!-- @summary[no]: TODO -->
+<!-- @summary[en]: TODO -->
+<page>
+    <display-name i18n="{{displayName_i18n}}">{{displayName}}</display-name>
+    <config>
+    </config>
+    <regions>
+    </regions>
+</page>

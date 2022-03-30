@@ -1,0 +1,7 @@
+<!-- @summary[no]:  -->
+<!-- @summary[en]:  -->
+<part>
+    <display-name i18n="{{displayName_i18n}}">{{displayName}}</display-name>
+    <config>
+    </config>
+</part>

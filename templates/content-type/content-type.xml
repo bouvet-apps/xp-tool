@@ -1,0 +1,6 @@
+<content-type>
+    <display-name i18n="{{displayName_i18n}}">{{displayName}}</display-name>
+    <super-type>base:structured</super-type>
+    <form>
+    </form>
+</content-type>
