@@ -1,6 +1,6 @@
 {
   "name": "@bouvet-apps/xp-tool",
-  "version": "2.0.0-B9",
+  "version": "2.0.0-B11",
   "description": "Enonic XP tools",
   "bin": {
     "xptool": "xptool.js"
@@ -33,7 +33,7 @@
     "markdown-it-table-of-contents": "^0.6.0",
     "marked": "^4.0.12",
     "marked-terminal": "^5.1.1",
-    "minimist": "^1.2.6",
+    "minimist": ">=1.2.6",
     "moment": "^2.29.1",
     "natural-orderby": "^2.0.3",
     "node-fetch": "^3.2.3",
@@ -43,7 +43,7 @@
     "tmp": "^0.2.1",
     "winston": "^3.6.0",
     "xml-js": "^1.6.11",
-    "chokidar": "^3.5.3"
+    "chokidar": ">=3.5.3"
   },
   "devDependencies": {
     "eslint": "^5.14.1",

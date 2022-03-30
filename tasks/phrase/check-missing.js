@@ -259,6 +259,7 @@ function checkFreemarkerTemplates() {
 function checkElement(element, xmlPath = "") {
   if (element.name === "label"
     || element.name === "display-name"
+    || element.name === "description"
     || element.name === "help-text"
     || (element.name === "option" && xmlPath.endsWith("config/option"))) {
     if (element.attributes && element.attributes.i18n) {
