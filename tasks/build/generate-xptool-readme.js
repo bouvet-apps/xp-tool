@@ -31,7 +31,7 @@ function generate() {
 function getIntro() {
   const intro = `# xptool ${version}\n`
     + "```xptool``` is a tool for daily development needs in Enonic XP.\n\n"
-    + "```npm install -g @bouvet/xp-tool```\n\n";
+    + "```npm install -g @bouvet-apps/xp-tool```\n\n";
   return intro;
 }
 

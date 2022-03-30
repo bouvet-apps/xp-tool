@@ -2,7 +2,6 @@
 const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
-//const watch = require("glob-watcher");
 const chokidar = require("chokidar");
 const util = require("../../lib/util");
 const subprojectUtil = require("../../lib/subproject");

@@ -1,4 +1,3 @@
-// const watch = require("glob-watcher");
 const chokidar = require("chokidar");
 const jsxXml = require("../../lib/jsx-xml");
 
