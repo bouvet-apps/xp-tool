@@ -1,4 +1,4 @@
-# xptool 2.0.0-B11
+# xptool 2.0.0-B12
 ```xptool``` is a tool for daily development needs in Enonic XP.
 
 ```npm install -g @bouvet-apps/xp-tool```

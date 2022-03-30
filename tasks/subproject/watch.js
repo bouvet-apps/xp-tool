@@ -14,7 +14,13 @@ exports.run = () => {
   const genPath = path.resolve(subprojectPath, "gen");
   const codePath = path.resolve(subprojectPath, "code");
 
-  const fileWatcher = chokidar.watch(codePath);
+  const fileWatcher = chokidar.watch(codePath, {
+    delay: 200,
+    events: ["add", "change", "unlink"],
+    ignored: [],
+    ignoreInitial: true,
+    queue: true
+  });
   util.printHeader(`Watching for changes/new files in ${codePath}\n`);
 
   fileWatcher.on("add", filePath => copyFile(filePath, genPath, baseProjectPath, subprojectPath));
