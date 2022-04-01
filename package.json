@@ -1,6 +1,6 @@
 {
   "name": "@bouvet-apps/xp-tool",
-  "version": "2.0.0-B14",
+  "version": "2.0.0-B16",
   "description": "Enonic XP tools",
   "bin": {
     "xptool": "xptool.js"
