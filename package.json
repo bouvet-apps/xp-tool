@@ -1,12 +1,15 @@
 {
   "name": "@bouvet-apps/xp-tool",
-  "version": "2.0.0-B12",
+  "version": "2.0.0-B14",
   "description": "Enonic XP tools",
   "bin": {
     "xptool": "xptool.js"
   },
   "main": "xptool.js",
   "author": "Daniel Holmen",
+  "contributors": [
+    "Ole Saggau"
+  ],
   "dependencies": {
     "@babel/cli": "7.16.0",
     "@babel/core": "^7.11.4",
