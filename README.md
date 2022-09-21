@@ -1,7 +1,7 @@
 # xptool 2.0.0-B8
 ```xptool``` is a tool for daily development needs in Enonic XP.
 
-```npm install -g @bouvet/xp-tool```
+```npm install -g @bouvet-apps/xp-tool```
 
 ## build:generate-xptool-readme
 Generates README.md for xptool.
