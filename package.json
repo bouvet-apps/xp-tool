@@ -1,6 +1,6 @@
 {
   "name": "@bouvet-apps/xp-tool",
-  "version": "2.0.0-B8",
+  "version": "2.0.0-B17",
   "description": "Enonic XP tools",
   "bin": {
     "xptool": "xptool.js"
@@ -15,7 +15,7 @@
     "@babel/plugin-transform-react-jsx": "^7.12.5",
     "@babel/preset-env": "^7.11.0",
     "chalk": "^2.4.2",
-    "cldr": "7.1.1",
+    "cldr": "7.2.0",
     "cli-table": "^0.3.1",
     "cronstrue": "^1.82.0",
     "deepmerge": "^3.2.0",
