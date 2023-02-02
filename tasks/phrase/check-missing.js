@@ -34,7 +34,7 @@ const XML_DESCRIPTORS = [
   },
   {
     type: "site configuration",
-    files: [{ name: "site", path: util.SITE_DIR, filename: "site.xml" }]
+    files: util.getSite()
   }
 ];
 
@@ -99,7 +99,7 @@ function analyze(cfg) {
     // log.info(JSON.stringify(d));
     d.files.forEach((f) => {
       if (config.verbose) util.printHeader(`Processing ${d.type} '${f.name}'`);
-      checkXml(f.filename, f.path, f.name);
+      checkXml(f.filename, f.path, f.name, f.buildPath);
     });
   });
 
@@ -143,16 +143,27 @@ exports.analyze = analyze;
  * @param {*} filename Filename of XML file
  * @param {*} filePath Path to XML file
  * @param {*} name Display name for XML file
+ * @param {*} buildPath Build Path to XML file, used if the file does not exist in filePath
  */
-function checkXml(filename, filePath, name) {
+function checkXml(filename, filePath, name, buildPath) {
   // console.log(filename);
   const filenameWithPath = path.resolve(filePath, filename);
 
   // Save error counter for comparison
   const counter = results.errors;
 
-  const xml = xmlconvert.xml2js(fs.readFileSync(filenameWithPath, XML_FILE_ENCODING), XML_OPTIONS);
+  let xml;
 
+  try {
+    xml = xmlconvert.xml2js(fs.readFileSync(filenameWithPath, XML_FILE_ENCODING), XML_OPTIONS);
+  } catch (error) {
+    if (buildPath) {
+      const buildFilenameWithPath = path.resolve(buildPath, filename);
+      xml = xmlconvert.xml2js(fs.readFileSync(buildFilenameWithPath, XML_FILE_ENCODING), XML_OPTIONS);
+    } else {
+      util.infoMessage(`error: ${error}`);
+    }
+  }
   // Recursively check XML
   checkElement(xml, name);
 

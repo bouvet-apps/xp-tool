@@ -1,2 +1,12 @@
 node_modules
 dist
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IntelliJ
+out/
+.idea
