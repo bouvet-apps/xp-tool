@@ -7,6 +7,10 @@
   },
   "main": "xptool.js",
   "author": "Daniel Holmen",
+  "contributors": [
+    "Ole Saggau",
+    "Vigdis Tostrup-Hanto"
+  ],
   "dependencies": {
     "@babel/cli": "7.20.7",
     "@babel/core": "^7.20.12",
@@ -33,7 +37,7 @@
     "markdown-it-table-of-contents": "^0.6.0",
     "marked": "^4.2.12",
     "marked-terminal": "^5.1.1",
-    "minimist": "^1.2.7",
+    "minimist": ">=1.2.7",
     "moment": "^2.29.4",
     "natural-orderby": "^2.0.3",
     "node-fetch": "^3.3.0",
@@ -43,7 +47,7 @@
     "tmp": "^0.2.1",
     "winston": "^3.8.2",
     "xml-js": "^1.6.11",
-    "chokidar": "^3.5.3"
+    "chokidar": ">=3.5.3"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
