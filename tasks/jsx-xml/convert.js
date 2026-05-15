@@ -127,7 +127,7 @@ const doReplace = (fileContent, isMixin) => {
       {
         match: /\n {2}/gmi,
         replace: "\n"
-      },
+      }
     );
   } else {
     toReplace.push(
