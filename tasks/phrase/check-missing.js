@@ -189,11 +189,9 @@ function checkJavascriptComments(globPath) {
 
       let match;
       while ((match = regex.exec(jsFile)) != null) {
-        if (!match[1].startsWith()) {
-          phraseCommentToArray(match[1]).forEach((phrase) => {
-            validatePhrase(phrase.replace(/['"]+/g, ""));
-          });
-        }
+        phraseCommentToArray(match[1]).forEach((phrase) => {
+          validatePhrase(phrase.replace(/['"]+/g, ""));
+        });
       }
     } else {
       util.warningMessage(`Skipping file ${js} due to size.`);

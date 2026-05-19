@@ -16,17 +16,15 @@ exports.run = async () => {
  * Prompt user for desired version number.
  */
 async function promptVersion() {
-  let response = await getListFromGithub();
-  response = response.filter(e => e.type === "dir" && e.name !== "SNAPSHOT");
-  response = orderBy(
-    response,
-    [v => v.name],
-    ["desc"]
-  );
+  const tags = await getTagsFromGithub();
+  const versions = tags
+    .map(t => t.name.replace(/^v/, ""))
+    .filter(name => !name.includes("SNAPSHOT"));
 
-  const versions = response.map(value => value.name).slice(0, 12); // Top 12
+  const sorted = orderBy(versions, [v => v], ["desc"]).slice(0, 12);
+
   const questions = [{
-    type: "select", name: "version", message: "Choose version", choices: versions
+    type: "select", name: "version", message: "Choose version", choices: sorted
   }];
   const answers = await enquirer.prompt(questions);
 
@@ -34,12 +32,15 @@ async function promptVersion() {
 }
 
 /**
- * Fetch directory listing from github.
+ * Fetch version tags from github.
  */
-async function getListFromGithub() {
+async function getTagsFromGithub() {
   const { default: fetch } = await import("node-fetch");
-  const response = await fetch("https://api.github.com/repos/enonic/docker-xp/contents/xp-app");
+  const response = await fetch("https://api.github.com/repos/enonic/docker-xp/tags?per_page=50");
   const data = await response.json();
+  if (!Array.isArray(data)) {
+    throw new Error(`Failed to fetch versions from GitHub: ${data.message || "unknown error"}`);
+  }
   return data;
 }
 
@@ -50,6 +51,11 @@ async function getListFromGithub() {
  */
 function updateDockerfile(version) {
   const filename = path.resolve(util.BASE_DIR, "enonic-server/exp/Dockerfile");
+
+  if (!fs.existsSync(filename)) {
+    util.warningMessage(`Dockerfile not found at ${filename}, skipping`);
+    return;
+  }
 
   let content = fs.readFileSync(filename, "utf8");
   const regex = /^(FROM\s+enonic\/xp-app:).*$/gm;
@@ -66,6 +72,11 @@ function updateDockerfile(version) {
  */
 function updateGradleProperties(version) {
   const filename = path.resolve(util.BASE_DIR, "code/gradle.properties");
+
+  if (!fs.existsSync(filename)) {
+    util.warningMessage(`gradle.properties not found at ${filename}, skipping`);
+    return;
+  }
 
   let content = fs.readFileSync(filename, "utf8");
   const regex = /^(xpVersion\s+=\s+).*$/gm;
