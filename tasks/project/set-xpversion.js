@@ -1,4 +1,3 @@
-const fetch = require("node-fetch");
 const path = require("path");
 const { orderBy } = require("natural-orderby");
 const enquirer = require("enquirer");
@@ -38,6 +37,7 @@ async function promptVersion() {
  * Fetch directory listing from github.
  */
 async function getListFromGithub() {
+  const { default: fetch } = await import("node-fetch");
   const response = await fetch("https://api.github.com/repos/enonic/docker-xp/contents/xp-app");
   const data = await response.json();
   return data;
