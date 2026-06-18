@@ -35,7 +35,6 @@ async function promptVersion() {
  * Fetch version tags from github.
  */
 async function getTagsFromGithub() {
-  const { default: fetch } = await import("node-fetch");
   const response = await fetch("https://api.github.com/repos/enonic/docker-xp/tags?per_page=50");
   const data = await response.json();
   if (!Array.isArray(data)) {
