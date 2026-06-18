@@ -21,22 +21,6 @@ exports.getConfig = () => [
   }
 ];
 
-// Deprecated, TODO make unpack command for compacts
-// eslint-disable-next-line no-unused-vars
-const createTemplate = (config) => {
-  const {
-    name, content, isComponent, mixins
-  } = config;
-
-  return util.renderTemplate("boilerplate", FILE_EXTENSION, {
-    isComponent,
-    imports: mixins,
-    renderOptions: JSON.stringify(XML_RENDER_OPTIONS),
-    name,
-    content
-  });
-};
-
 const createTemplateCompact = (config) => {
   const {
     name, content, isComponent, mixins
@@ -184,11 +168,11 @@ const convertFile = async (filePath) => {
 
     const newPath = filePath.replace(".xml", FILE_EXTENSION);
     await writeFile(newPath, convertedFile);
-    console.log(`JSX converted file at ${relativePath}`);
+    util.successMessage(`JSX converted file at ${relativePath}`);
     return true;
   } catch (err) {
     util.errorMessage(`Failed to convert file at ${relativePath}`);
-    console.log(err);
+    console.error(err);
   }
   return false;
 };
@@ -222,7 +206,7 @@ const deleteFiles = async () => {
       util.warningMessage(`Deleted file at ${filePath}`);
     } catch (err) {
       util.errorMessage(`Failed to delete file at ${filePath}`);
-      console.log(err);
+      console.error(err);
     }
   }
 };
