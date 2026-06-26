@@ -54,7 +54,7 @@ Render via `util.renderTemplate(name, type, model, destination)` from [lib/util/
 
 ## i18n (Project Phrases)
 
-[lib/util/i18n.js](lib/util/i18n.js) manages Enonic XP project phrase files at `site/i18n/phrases.properties` (English) and `phrases_<code>.properties` (other languages). Use `addPhrase(key, phraseObject)` to append to all language files at once.
+[lib/util/i18n.js](lib/util/i18n.js) manages Enonic XP project phrase files at `site/i18n/phrases.properties` or `cms/i18n/phrases.properties` (English) and `phrases_<code>.properties` (other languages). Use `addPhrase(key, phraseObject)` to append to all language files at once.
 
 ## Adding a New Task
 

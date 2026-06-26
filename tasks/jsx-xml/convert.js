@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const { relative, basename } = require("path");
+const { relative, basename, extname } = require("path");
 const {
   writeFile, readFile, unlink
 } = require("fs").promises;
@@ -63,7 +63,7 @@ const processFileName = s => s.split("-").map(word => capitalize(word)).join("")
 const getAllFiles = () => glob.sync(globPath);
 
 const getPathToSite = (filePath) => {
-  const path = relative(filePath, SITE_DIR);
+  const path = relative(SITE_DIR, filePath);
 
   if (path === ".." || path.length === 0) return ".";
   return path.split("/").slice(0, -1).join("/");
@@ -151,9 +151,9 @@ const convertFile = async (filePath) => {
   const relativePath = relative(SITE_DIR, filePath);
   try {
     const fileContent = await readFile(filePath, "utf8");
-    const fileName = basename(filePath, ".xml");
-    const isComponent = !filePath.match(/main\/resources\/site\/(pages|layouts|content-types|parts|x-data|site\.xml)/gmi);
-    const isMixin = filePath.match(/main\/resources\/site\/mixins/gmi);
+    const fileName = basename(filePath, extname(filePath));
+    const isComponent = !/main\/resources\/(site|cms)\/(pages|layouts|content-types|parts|x-data|site\.xml|site\.yaml|cms\.yaml)/gmi.test(filePath);
+    const isMixin = /main\/resources\/(site|cms)\/mixins/gmi.test(filePath);
     const hasSummary = !!fileContent.match(/<!-- @(summary)/gmi);
     const hasDescription = !!fileContent.match(/<!-- @(description)/gmi);
     const hasImage = !!fileContent.match(/<!-- @(image)/gmi);
@@ -246,6 +246,6 @@ exports.run = async (config) => {
 
   util.infoMessage("Updating your babel, eslint etc. to work with/ignore the JSX files is up to you");
   util.printHeader("Xptool provides compiler and watcher for JSX files!");
-  util.printBullet(`Running 'xptool jsx-xml build' will compile your *${FILE_EXTENSION} files in /site to XML in build folder`);
-  util.printBullet(`Add 'xptool jsx-xml watch' to your npm scripts (or use xptool directly in terminal). This will watch all *${FILE_EXTENSION} files in /site and recompile when they or outbound dependencies are changed.`);
+  util.printBullet(`Running 'xptool jsx-xml build' will compile your *${FILE_EXTENSION} files in /site or /cms to XML in build folder`);
+  util.printBullet(`Add 'xptool jsx-xml watch' to your npm scripts (or use xptool directly in terminal). This will watch all *${FILE_EXTENSION} files in /site or /cms and recompile when they or outbound dependencies are changed.`);
 };

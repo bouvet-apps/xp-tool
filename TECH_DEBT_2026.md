@@ -235,3 +235,28 @@ Siden Babel 7.14 er disse plugin-ene innebygd i `@babel/preset-env`:
 3. Kjør `xptool phrase:check-missing` og lagre output.
 4. Kjør `xptool jsx-xml:build` og bekreft at genererte XML-filer oppdateres uten feil.
 5. Hvis resultat avviker fra andre miljøer med "samme" versjon, sammenlign nøkkelfilene i installert pakke som nevnt i matrisen.
+
+## XP8-støtte: status og gjenstående arbeid
+
+**Mål for `feature/xp8-upgrade`:** xptool skal ikke knekke i XP8-prosjekter (der `site/` er renavnet til `cms/` og descriptorer er YAML).
+
+### Gjort i denne branchen
+- Stioppløsning støtter både `site/` (XP7) og `cms/` (XP8); `cms` foretrekkes når begge finnes (`lib/util/paths.js`).
+- Descriptor-oppslag finner `.xml`, `.yaml` og `.yml`, og `getSite()` håndterer `site.xml`/`site.yaml`/`cms.yaml` (`lib/util/xp.js`).
+- `documentation generate` og `phrase check-missing` hopper over YAML-descriptorer med advarsel i stedet for å kræsje (XML kreves for parsing).
+- `jsx-xml convert` håndterer både `site` og `cms`.
+- Smoke-tester for XP7- og XP8-struktur (`scripts/smoke-test.sh`, `npm run smoke`).
+
+### TODO (bevisst utsatt — utenfor scope for "ikke knekke")
+- **`create`-tasks genererer fortsatt XP7-XML.** `part`/`page`/`layout`/`content-type` (og `task`/`service`) skriver XML-descriptorer også i XP8-prosjekter. Det blir ugyldige descriptorer i XP8 (skal være YAML med `kind:`). Krever: versjonsdeteksjon (`xpVersion` i `gradle.properties` → fallback `cms`/`site`), YAML-templates pr. type, og valg av format i create-taskene.
+  - **i18n i XP8 YAML (verifisert mot offisiell doc + app-hmdb):** Et lokaliserbart felt er enten en ren streng eller et objekt `{ text, i18n }` — det finnes ikke et eget `titleI18nKey`-felt. Lokaliserbare felt: `title`, `label`, `help-text`, `description`. `i18n`-nøkkelen må matche en linje i `(cms/)i18n/phrases.properties` (samme filer `addPhrase` allerede skriver til). En generert XP8-part blir da f.eks.:
+    ```yaml
+    kind: Part
+    title:
+      text: "Hello part"
+      i18n: "hello.displayName"
+    form: []
+    ```
+    Kilde: <https://developer.enonic.com/docs/cms/xp8/schemas/i18n>
+- **`documentation generate` parser ikke YAML.** XP8-descriptorer dokumenteres ikke (kun hoppes over). Full XP8-doc-støtte krever YAML-parsing + mapping til doc-modellen.
+- **`jsx-xml convert` håndterer kun `.xml`.** YAML-descriptorer konverteres ikke til JSX (sannsynligvis akseptabelt — JSX-flyten er XML-spesifikk).

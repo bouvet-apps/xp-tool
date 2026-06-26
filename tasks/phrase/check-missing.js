@@ -98,8 +98,19 @@ function analyze(cfg) {
   XML_DESCRIPTORS.forEach((d) => {
     // log.info(JSON.stringify(d));
     d.files.forEach((f) => {
-      if (config.verbose) util.printHeader(`Processing ${d.type} '${f.name}'`);
-      checkXml(f.filename, f.path, f.name, f.buildPath);
+      const filename = f.filename.toLowerCase();
+
+      if (filename.endsWith(".xml")) {
+        if (config.verbose) util.printHeader(`Processing ${d.type} '${f.name}'`);
+        checkXml(f.filename, f.path, f.name, f.buildPath);
+      } else if (filename.endsWith(".yaml") || filename.endsWith(".yml")) {
+        // XP8 YAML descriptor: not fully parsed, but scan for i18n references so
+        // phrases referenced from YAML are marked as used (and not pruned).
+        if (config.verbose) util.printHeader(`Processing ${d.type} '${f.name}' (YAML)`);
+        checkYaml(f.filename, f.path, f.name, f.buildPath);
+      } else if (config.verbose) {
+        util.warningMessage(`Skipping descriptor '${f.filename}' (${d.type})`);
+      }
     });
   });
 
@@ -169,6 +180,43 @@ function checkXml(filename, filePath, name, buildPath) {
 
   // If we haven't produced any new errors, display success message
   if (config.verbose && counter === results.errors) util.successMessage("Ok");
+}
+
+
+/**
+ * Check XP8 YAML descriptor for i18n references.
+ *
+ * YAML descriptors are not fully parsed (no YAML dependency); instead we scan
+ * the file text for the `i18n:` keys of the XP8 `{ text, i18n }` localization
+ * pattern and validate them. This keeps phrases referenced from YAML out of the
+ * "not used" set, so `prune` does not delete them. Detection of *missing* i18n
+ * on YAML fields (the structural check `checkXml` does) is not attempted here.
+ *
+ * @param {*} filename Filename of YAML file
+ * @param {*} filePath Path to YAML file
+ * @param {*} name Display name for the descriptor
+ * @param {*} buildPath Build path, used if the file does not exist in filePath
+ */
+function checkYaml(filename, filePath, name, buildPath) {
+  const filenameWithPath = path.resolve(filePath, filename);
+
+  let content;
+  try {
+    content = fs.readFileSync(filenameWithPath, XML_FILE_ENCODING);
+  } catch (error) {
+    if (buildPath) {
+      content = fs.readFileSync(path.resolve(buildPath, filename), XML_FILE_ENCODING);
+    } else {
+      util.infoMessage(`error: ${error}`);
+      return;
+    }
+  }
+
+  const i18nRegex = /^\s*i18n:\s*["']?([^"'\s#]+)/gm;
+  let match;
+  while ((match = i18nRegex.exec(content)) != null) {
+    validatePhrase(match[1]);
+  }
 }
 
 

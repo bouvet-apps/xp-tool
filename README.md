@@ -82,7 +82,7 @@ xptool jsx-xml build
 ```  
   
 ## jsx-xml:convert
-Converts all XML files in /site directory to JSX.
+Converts all XML files in /site or /cms directory to JSX.
 
 
 **Syntax:**
@@ -181,7 +181,7 @@ Loops through and checks phrase usage for the following:
 * X-data XML files
 * Mixin XML files
 * Page XML files
-* Site descriptor (site.xml)
+* Site descriptor (site.xml, site.yaml or cms.yaml)
 * Freemarker templates (*.ftl)
 * Backend javascript (*.es6/*.js)
 * Frontend javascript (*.es6/*.js/*.vue/*.jsx)
@@ -223,7 +223,7 @@ xptool phrase edit
 ```  
   
 ## phrase:list-languages
-Lists all languages in the project. The list of languages is determined by reading the ```i18n/phrases[_language].properties``` files from the site directory.
+Lists all languages in the project. The list of languages is determined by reading the ```i18n/phrases[_language].properties``` files from the site or cms directory.
 
 **Syntax:**
 ```

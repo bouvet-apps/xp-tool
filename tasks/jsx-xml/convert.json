@@ -1,3 +1,3 @@
 {
-  "description": "Converts all XML files in /site directory to JSX.\n"
+  "description": "Converts all XML files in /site or /cms directory to JSX.\n"
 }
