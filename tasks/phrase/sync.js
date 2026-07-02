@@ -1,12 +1,12 @@
-const propertiesReader = require("properties-reader");
-const util = require("../../lib/util");
-const validatePhrases = require("./validate");
+import propertiesReader from "properties-reader";
+import * as util from "../../lib/util/index.js";
+import * as validatePhrases from "./validate.js";
 
 const PHRASES_DIR = `${util.SITE_DIR}/i18n`;
 
 let config;
 
-exports.run = (cfg) => {
+export function run(cfg) {
   config = cfg;
 
   if (config.verbose) util.printHeader("Sync phrases files");
@@ -28,7 +28,7 @@ exports.run = (cfg) => {
   });
 
   util.successMessage("Done");
-};
+}
 
 function getPhrase(key, languages) {
   let phrase = "";

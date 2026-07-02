@@ -1,14 +1,14 @@
 
-const fs = require("fs");
-const fse = require("fs-extra");
-const path = require("path");
-const chokidar = require("chokidar");
-const util = require("../../lib/util");
-const subprojectUtil = require("../../lib/subproject");
+import fs from "fs";
+import fse from "fs-extra";
+import path from "path";
+import chokidar from "chokidar";
+import * as util from "../../lib/util/index.js";
+import * as subprojectUtil from "../../lib/subproject.js";
 
 const EXTEND_MARKER = "/* XP_TOOL_EXTEND_SOURCE */";
 
-exports.run = () => {
+export function run() {
   const baseProjectPath = path.resolve(subprojectUtil.subprojectDir, "../..");
   const subprojectPath = subprojectUtil.subprojectDir;
   const genPath = path.resolve(subprojectPath, "gen");
@@ -25,7 +25,7 @@ exports.run = () => {
 
   fileWatcher.on("add", filePath => copyFile(filePath, genPath, baseProjectPath, subprojectPath));
   fileWatcher.on("change", filePath => copyFile(filePath, genPath, baseProjectPath, subprojectPath));
-};
+}
 
 function copyFile(filePath, genPath, baseProjectPath, subprojectPath) {
   const relPath = (path.relative(subprojectPath, filePath));

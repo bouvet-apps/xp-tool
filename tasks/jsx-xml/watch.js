@@ -1,9 +1,9 @@
-const chokidar = require("chokidar");
-const jsxXml = require("../../lib/jsx-xml");
-const util = require("../../lib/util");
+import chokidar from "chokidar";
+import * as jsxXml from "../../lib/jsx-xml/index.js";
+import * as util from "../../lib/util/index.js";
 
 // async function to enable await, making sure initial transpile run is ran first
-exports.run = async () => {
+export async function run() {
   util.infoMessage(`Starting JSX to XML compiler. Watching ${jsxXml.JSX_GLOB_PATH}`);
   await jsxXml.initialBuild();
 
@@ -18,4 +18,4 @@ exports.run = async () => {
 
   fileWatcher.on("add", (p) => jsxXml.transformFile(p).catch((err) => util.errorMessage(err.message)));
   fileWatcher.on("change", (p) => jsxXml.transformFile(p).catch((err) => util.errorMessage(err.message)));
-};
+}

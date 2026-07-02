@@ -1,16 +1,16 @@
-const path = require("path");
-const { orderBy } = require("natural-orderby");
-const enquirer = require("enquirer");
-const fs = require("fs");
-const util = require("../../lib/util");
+import path from "path";
+import { orderBy } from "natural-orderby";
+import enquirer from "enquirer";
+import fs from "fs";
+import * as util from "../../lib/util/index.js";
 
-exports.run = async () => {
+export async function run() {
   util.printHeader("Set Enonic XP version");
   const version = await promptVersion();
 
   updateDockerfile(version);
   updateGradleProperties(version);
-};
+}
 
 /**
  * Prompt user for desired version number.
@@ -84,4 +84,4 @@ function updateGradleProperties(version) {
 
   util.successMessage(`Updated version number to ${version} in gradle.properties`);
 }
-exports.updateGradleProperties = updateGradleProperties;
+export { updateGradleProperties };

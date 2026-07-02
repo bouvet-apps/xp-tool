@@ -1,25 +1,25 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const { relative, basename } = require("path");
-const {
-  writeFile, readFile, unlink
-} = require("fs").promises;
-const glob = require("glob");
-const util = require("../../lib/util");
+import { relative, basename } from "path";
+import { writeFile, readFile, unlink } from "fs/promises";
+import { sync as globSync } from "glob";
+import * as util from "../../lib/util/index.js";
 
-const { FILE_EXTENSION, XML_RENDER_OPTIONS } = require("../../lib/jsx-xml");
+import { FILE_EXTENSION, XML_RENDER_OPTIONS } from "../../lib/jsx-xml/index.js";
 
 const SITE_DIR = util.SITE_DIR;
 const globPath = `${SITE_DIR}/**/*.xml`;
 
-exports.getConfig = () => [
-  {
-    argument: "delete",
-    type: "string",
-    message: "Delete XML files after conversion? If so, answer 'DELETE' (without ticks)"
-  }
-];
+export function getConfig() {
+  return [
+    {
+      argument: "delete",
+      type: "string",
+      message: "Delete XML files after conversion? If so, answer 'DELETE' (without ticks)"
+    }
+  ];
+}
 
 const createTemplateCompact = (config) => {
   const {
@@ -44,7 +44,7 @@ const capitalize = (s) => {
 // list-article -> ListArticle
 const processFileName = s => s.split("-").map(word => capitalize(word)).join("");
 
-const getAllFiles = () => glob.sync(globPath);
+const getAllFiles = () => globSync(globPath);
 
 const getPathToSite = (filePath) => {
   const path = relative(filePath, SITE_DIR);
@@ -211,7 +211,7 @@ const deleteFiles = async () => {
   }
 };
 
-exports.run = async (config) => {
+export async function run(config) {
   const shouldDelete = (config.delete || "") === "DELETE";
   util.printHeader("Converting XML files to JSX");
   if (shouldDelete) {
@@ -232,4 +232,4 @@ exports.run = async (config) => {
   util.printHeader("Xptool provides compiler and watcher for JSX files!");
   util.printBullet(`Running 'xptool jsx-xml build' will compile your *${FILE_EXTENSION} files in /site to XML in build folder`);
   util.printBullet(`Add 'xptool jsx-xml watch' to your npm scripts (or use xptool directly in terminal). This will watch all *${FILE_EXTENSION} files in /site and recompile when they or outbound dependencies are changed.`);
-};
+}
