@@ -1,8 +1,11 @@
 # xptool 2.0.0-B17
 ```xptool``` is a tool for daily development needs in Enonic XP.
 
+**Requires Node.js >= 22.**
+
 ```npm install -g @bouvet-apps/xp-tool```
 
+For JSX-XML usage, see [jsx-xml.md](./docs/jsx-xml.md).  
 For development of xp-tool, see [development.md](./docs/development.md).
 
 ## build:generate-xptool-readme
