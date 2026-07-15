@@ -12,14 +12,16 @@ xptool lets you write Enonic XP XML descriptors (content types, parts, pages, la
 
 ## File extension
 
-The default file extension is `.xml.jsx`. Files are picked up from `src/main/resources/**/*<extension>`.
+By default, xptool compiles JSX-XML source files with the `.xml.jsx` extension, picked up from `src/main/resources/**/*<extension>`.
 
-You can change the extension per project by creating `.xptool/config.json` at the project root:
+### Changing the extension
+
+Create `.xptool/config.json` (see [Where config.json must live](#where-configjson-must-live) below) to switch to a different extension:
 
 ```json
 {
   "jsxXml": {
-    "extension": "default"
+    "extension": "alternative"
   }
 }
 ```
@@ -29,6 +31,21 @@ You can change the extension per project by creating `.xptool/config.json` at th
 | `"default"` | `.xml.jsx` |
 | `"alternative"` | `.jsxxml` |
 | `"short"` | `.jsx` |
+
+### Where `config.json` must live
+
+xptool resolves a **base directory** by walking up from the current working directory until it finds either:
+
+1. a folder literally named `code`, or
+2. a file named `gradle.properties`
+
+It then looks for `config.json` *inside that base directory* (falling back to `process.cwd()` if neither marker is found).
+
+In a project laid out with a `code` subfolder (containing `package.json`, `node_modules`, and `gradle.properties`), this means:
+
+- Put the config at **`<repo-root>/.xptool/config.json`**, one level *above* `code` — not next to `package.json`.
+- This is true even when you run xptool from inside `code` (e.g. via `npm run build:jsxxml`), because it walks *up* to find the base dir rather than using cwd directly.
+- If placed at `code/.xptool/config.json` instead, it's silently ignored — you'll just see `No config file in project, using defaults` and get no compiled output for your custom extension.
 
 ## The JSXXML pragma
 
