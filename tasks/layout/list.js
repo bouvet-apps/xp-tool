@@ -1,6 +1,6 @@
-const util = require("../../lib/util");
+import * as util from "../../lib/util/index.js";
 
-exports.run = () => {
+export function run() {
   const layouts = util.getLayouts();
 
   util.printHeader(`Layouts (${layouts.length})`);
@@ -8,4 +8,4 @@ exports.run = () => {
   layouts.forEach((layout) => {
     util.printBullet(layout.name);
   });
-};
+}

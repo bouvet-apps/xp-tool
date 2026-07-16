@@ -1,8 +1,8 @@
-const enquirer = require("enquirer");
-const fs = require("fs");
-const path = require("path");
-const marked = require("marked");
-const util = require("../../lib/util");
+import enquirer from "enquirer";
+import fs from "fs";
+import path from "path";
+import { marked } from "marked";
+import * as util from "../../lib/util/index.js";
 
 const VERSIONING_HELP = "### Semantic versioning for our projects\n"
   + "Format: **MAJOR**.**MINOR**.**PATCH**_-commit_hash_\n\n"
@@ -19,13 +19,13 @@ const VERSIONING_HELP = "### Semantic versioning for our projects\n"
 const GRADLE_PROPERTIES_FILENAME = path.resolve(util.BASE_DIR, "code/gradle.properties");
 
 
-exports.run = async () => {
+export async function run() {
   util.printHeader("Set project version");
   console.log(`\n${marked(VERSIONING_HELP)}`);
   const version = await promptVersion();
 
   updateGradleProperties(version);
-};
+}
 
 /**
  * Prompt user for desired version number.

@@ -1,6 +1,6 @@
-const util = require("../../lib/util");
+import * as util from "../../lib/util/index.js";
 
-exports.run = () => {
+export function run() {
   util.printHeader("Edit phrase");
   throw new Error("Not implemented");
-};
+}

@@ -1,15 +1,19 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { createRequire } from "module";
+import { fileURLToPath } from "url";
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const require = createRequire(import.meta.url);
 
-const util = require("../../lib/util");
-const { tasks } = require("../../tasks");
+import * as util from "../../lib/util/index.js";
+import { tasks } from "../../tasks.js";
 const { version } = require("../../package.json");
 
-exports.run = () => {
+export function run() {
   util.printHeader("Generating xptool README.md");
   generate();
   util.successMessage("Done.");
-};
+}
 
 /**
  * Generate README.md file from each tasks description field

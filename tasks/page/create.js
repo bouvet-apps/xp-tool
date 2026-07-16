@@ -1,25 +1,27 @@
-const fse = require("fs-extra");
-const path = require("path");
-const util = require("../../lib/util");
+import fse from "fs-extra";
+import path from "path";
+import * as util from "../../lib/util/index.js";
 
 const { SITE_DIR } = util;
 
 const type = "page";
 
-exports.getConfig = () => [
-  {
-    argument: "name",
-    type: "string",
-    message: "Enter name (no spaces)",
-    validate: util.VALIDATORS.nospace
-  }, {
-    argument: "displayName",
-    type: "phrase",
-    message: "Enter displayName"
-  }
-];
+export function getConfig() {
+  return [
+    {
+      argument: "name",
+      type: "string",
+      message: "Enter name (no spaces)",
+      validate: util.VALIDATORS.nospace
+    }, {
+      argument: "displayName",
+      type: "phrase",
+      message: "Enter displayName"
+    }
+  ];
+}
 
-exports.run = (config) => {
+export function run(config) {
   const name = config.name;
   const displayName = config.displayName;
 
@@ -44,4 +46,4 @@ exports.run = (config) => {
 
     util.addPhrase(model.displayName_i18n, displayName);
   });
-};
+}

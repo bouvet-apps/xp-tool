@@ -89,4 +89,5 @@ typings/
 
 .DS_Store
 code/
-dist
+dist/*
+!dist/components/

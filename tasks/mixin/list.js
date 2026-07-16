@@ -1,6 +1,6 @@
-const util = require("../../lib/util");
+import * as util from "../../lib/util/index.js";
 
-exports.run = () => {
+export function run() {
   const mixins = util.getMixins();
 
   util.printHeader(`Mixins (${mixins.length})`);
@@ -8,4 +8,4 @@ exports.run = () => {
   mixins.forEach((mixin) => {
     util.printBullet(mixin.name);
   });
-};
+}

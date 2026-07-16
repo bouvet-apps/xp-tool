@@ -1,5 +1,8 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const TASKS_PATH = path.resolve(__dirname, "./tasks");
 
@@ -19,7 +22,6 @@ function getActions() {
   const actions = {};
   const groups = getDirectories(TASKS_PATH);
   groups.sort().forEach((group) => {
-    // Get list of js files
     const files = fs.readdirSync(path.join(TASKS_PATH, group))
       .filter(f => f.endsWith(TASK_DESCRIPTOR_EXTENSION));
 
@@ -29,16 +31,14 @@ function getActions() {
       return {
         action: f.substr(0, f.indexOf(TASK_DESCRIPTOR_EXTENSION)),
         component: taskFilename,
-        descriptor: JSON.parse(fs.readFileSync(path.resolve(TASKS_PATH, group, f)))// path.join(group, f)
+        descriptor: JSON.parse(fs.readFileSync(path.resolve(TASKS_PATH, group, f)))
       };
     });
 
     if (a.length > 0) actions[group] = a;
   });
 
-  // console.log(JSON.stringify(actions, null, 2));
-
   return actions;
 }
 
-exports.tasks = getActions();
+export const tasks = getActions();

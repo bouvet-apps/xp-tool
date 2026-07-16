@@ -1,26 +1,28 @@
 #!/usr/bin/env node
-const minimist = require("minimist");
-const Enquirer = require("enquirer");
-const marked = require("marked");
-const TerminalRenderer = require("marked-terminal");
-const chalk = require("chalk");
+import { createRequire } from "module";
+import { fileURLToPath } from "url";
+import minimist from "minimist";
+import Enquirer from "enquirer";
+import { marked } from "marked";
+import { markedTerminal } from "marked-terminal";
+import chalk from "chalk";
 
-const { tasks } = require("./tasks");
-const { getLanguages, printHeader } = require("./lib/util");
+import { tasks } from "./tasks.js";
+import { getLanguages, printHeader } from "./lib/util/index.js";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const require = createRequire(import.meta.url);
 const { version } = require("./package.json");
 
 const enquirer = new Enquirer();
+
+marked.use(markedTerminal());
 
 const args = minimist(process.argv.slice(2), {
   alias: {
     h: "help",
     v: "version"
   }
-});
-
-marked.setOptions({
-  // Define custom renderer
-  renderer: new TerminalRenderer()
 });
 
 /**
@@ -54,9 +56,6 @@ function displayLogo() {
 
 /**
  * Get path for task component by type and action.
- *
- * @param {string} type Task type
- * @param {string} action Task action
  */
 function getComponentPath(type, action) {
   const task = tasks[type].filter(t => t.action === action)[0];
@@ -65,18 +64,13 @@ function getComponentPath(type, action) {
 
 /**
  * Get task component by type and action.
- *
- * @param {string} type Task type
- * @param {string} action Task action
  */
-/* eslint-disable-next-line import/no-dynamic-require */
-function getComponent(type, action) { return require(getComponentPath(type, action)); }
+async function getComponent(type, action) {
+  return await import(getComponentPath(type, action));
+}
 
 /**
  * Get actions for task by type.
- *
- * @param {string} type Task type
- * @returns Array of action strings for type
  */
 function getActionList(type) { return tasks[type].filter(action => action.descriptor.hidden !== true).map(action => action.action); }
 
@@ -85,10 +79,6 @@ function getTypeListExcludeHidden() { return Object.keys(tasks).filter(taskGroup
 
 /**
  * Validate task type and action.
- *
- * @param {string} type Task type
- * @param {string} action Task action
- * @returns true if type is valid and has action
  */
 function validateAction(type, action) {
   if (!action) return false;
@@ -97,9 +87,6 @@ function validateAction(type, action) {
 
 /**
  * Validate task type.
- *
- * @param {string} type Task type
- * @returns true if type is valid.
  */
 function validateType(type) {
   if (!type) return false;
@@ -128,12 +115,10 @@ if (args.help) {
   const action = args._[1];
 
   if (validateAction(type, action) && validateType(type)) {
-    // const task = getComponent(type, action);
-
     const taskDescriptor = tasks[type].filter(t => t.action === action)[0].descriptor;
     /* eslint-disable-next-line no-prototype-builtins */
     if ("description" in taskDescriptor) {
-      console.log(marked(taskDescriptor.description));
+      console.log(marked.parse(taskDescriptor.description));
     } else {
       console.log("No usage information defined for task");
     }
@@ -184,13 +169,11 @@ async function main() {
     if (!validateType(type) || !validateAction(action)) {
       const taskConfig = await promptTaskConfig(type, action);
 
-      // Get task component
-      const task = getComponent(taskConfig.type, taskConfig.action);
+      const task = await getComponent(taskConfig.type, taskConfig.action);
 
       if (task.getConfig && typeof (task.getConfig) === "function") {
         const configParameters = task.getConfig();
 
-        // Build questions for specific task config
         const typeMap = {
           string: "input",
           phrase: "form",
@@ -202,12 +185,10 @@ async function main() {
             type: typeMap[param.type]
           };
 
-          // If we have a validator, add it
           if (param.validate && typeof (param.validate) === "function") {
             result.validate = param.validate;
           }
 
-          // Expand phrases into a form
           if (param.type === "phrase") {
             result.choices = getLanguages().map(language => ({
               name: language.code,
@@ -235,5 +216,4 @@ async function main() {
     process.exit(1);
   }
 }
-exports.main = main;
 main();

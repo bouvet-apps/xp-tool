@@ -1,16 +1,16 @@
-const fs = require("fs");
-const path = require("path");
-const util = require("../../lib/util");
+import fs from "fs";
+import path from "path";
+import * as util from "../../lib/util/index.js";
 
 let config;
 
-exports.run = (cfg) => {
+export function run(cfg) {
   util.printHeader("Tidying phrases files");
 
   tidy(cfg);
-};
+}
 
-function tidy(cfg, exclude = []) {
+export function tidy(cfg, exclude = []) {
   config = cfg;
   util.getLanguages().forEach((language) => {
     if (config.verbose) util.printHeader(`Processing ${language.filename}`);
@@ -47,7 +47,6 @@ function tidy(cfg, exclude = []) {
     util.successMessage(`${language.filename} tidied up.`);
   });
 }
-exports.tidy = tidy;
 
 function extractGlossary(keys) {
   const glossary = [];

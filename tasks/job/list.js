@@ -1,12 +1,12 @@
-const fs = require("fs");
-const path = require("path");
-const xml = require("pixl-xml");
-const cronstrue = require("cronstrue");
-const Table = require("cli-table");
+import fs from "fs";
+import path from "path";
+import xml from "pixl-xml";
+import cronstrue from "cronstrue";
+import Table from "cli-table";
 
-const { RESOURCE_DIR, printHeader } = require("../../lib/util");
+import { RESOURCE_DIR, printHeader } from "../../lib/util/index.js";
 
-exports.run = () => {
+export function run() {
   printHeader("Jobs");
 
   const jobsDirectory = path.resolve(RESOURCE_DIR, "jobs");
@@ -33,4 +33,4 @@ exports.run = () => {
   } else {
     console.log("Jobs file does not exist.");
   }
-};
+}
