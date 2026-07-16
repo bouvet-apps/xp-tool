@@ -1,5 +1,3 @@
-"use strict";
-
 /** @jsx JSXXML */
 const jsxxml = require("jsx-xml");
 const {

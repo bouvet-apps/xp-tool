@@ -2,7 +2,7 @@
 import { resolve } from "path";
 import { writeFile, readFile } from "fs/promises";
 import fse from "fs-extra";
-import babel from "@babel/core";
+import * as babel from "@babel/core";
 import { fileURLToPath } from "url";
 
 import { printHeader, successMessage, infoMessage } from "../../lib/util/index.js";
