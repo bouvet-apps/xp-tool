@@ -1,10 +1,11 @@
-const fse = require("fs-extra");
-const path = require("path");
-const util = require("../../lib/util");
+import fse from "fs-extra";
+import path from "path";
+import * as util from "../../lib/util/index.js";
 
 const type = "task";
 
-exports.getConfig = () => [
+export function getConfig() {
+  return [
   {
     argument: "name",
     type: "string",
@@ -16,8 +17,9 @@ exports.getConfig = () => [
     message: "Enter description"
   }
 ];
+}
 
-exports.run = (config) => {
+export function run(config) {
   const name = config.name;
   const description = config.description;
 
@@ -38,4 +40,4 @@ exports.run = (config) => {
     util.renderTemplate(type, "xml", model, `${targetDirectory}/${name}.xml`);
     util.renderTemplate(type, "es6", model, `${targetDirectory}/${name}.es6`);
   });
-};
+}

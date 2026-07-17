@@ -1,5 +1,5 @@
-const { run } = require("./generate");
+import { run as generateRun } from "./generate.js";
 
-exports.run = () => {
-  run({ build: false });
-};
+export function run() {
+  generateRun({ build: false });
+}

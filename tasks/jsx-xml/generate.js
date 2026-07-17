@@ -1,13 +1,16 @@
 /* eslint-disable no-await-in-loop */
-const { resolve } = require("path");
-const { writeFile, readFile } = require("fs").promises;
-const fse = require("fs-extra");
-const babel = require("@babel/core");
+import { resolve } from "path";
+import { writeFile, readFile } from "fs/promises";
+import fse from "fs-extra";
+import * as babel from "@babel/core";
+import { fileURLToPath } from "url";
 
-const { printHeader, successMessage, infoMessage } = require("../../lib/util");
-const { JSX_BUILT_INS, BABEL_OPTIONS } = require("../../lib/jsx-xml");
+import { printHeader, successMessage, infoMessage } from "../../lib/util/index.js";
+import { JSX_BUILT_INS, BABEL_OPTIONS } from "../../lib/jsx-xml/index.js";
 
-exports.run = async () => {
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+
+export async function run() {
   const dirPath = resolve(__dirname, "../../dist/components");
   fse.ensureDirSync(dirPath);
 
@@ -25,4 +28,4 @@ exports.run = async () => {
     successMessage(`Transpiled:  ${targetPath}`);
   }
   infoMessage("Finished transpiling to dist");
-};
+}

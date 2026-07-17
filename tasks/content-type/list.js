@@ -1,9 +1,9 @@
-const util = require("../../lib/util");
+import * as util from "../../lib/util/index.js";
 
-exports.run = () => {
+export function run() {
   util.printHeader("Content types");
 
   util.getContentTypes().forEach((ct) => {
     util.printBullet(ct.name);
   });
-};
+}
