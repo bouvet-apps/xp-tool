@@ -54,7 +54,7 @@
     "node": "^22.18.0 || >=24.11.0"
   },
   "overrides": {
-    "xmlbuilder2": "^4.0.3"
+    "xmlbuilder2": "4.0.3"
   },
   "scripts": {
     "start": "node xptool.js",
