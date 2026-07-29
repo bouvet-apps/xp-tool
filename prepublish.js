@@ -1,5 +1,5 @@
-const { run: generateXptoolReadme } = require("./tasks/build/generate-xptool-readme");
-const { run: generateDist } = require("./tasks/jsx-xml/generate");
+import { run as generateXptoolReadme } from "./tasks/build/generate-xptool-readme.js";
+import { run as generateDist } from "./tasks/jsx-xml/generate.js";
 
 async function prepublish() {
   generateDist();

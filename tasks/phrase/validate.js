@@ -1,12 +1,12 @@
-const propertiesReader = require("properties-reader");
-const chalk = require("chalk");
-const util = require("../../lib/util");
+import propertiesReader from "properties-reader";
+import chalk from "chalk";
+import * as util from "../../lib/util/index.js";
 
 const PHRASES_DIR = `${util.SITE_DIR}/i18n`;
 
 let config;
 
-exports.run = (cfg) => {
+export function run(cfg) {
   const results = analyze(cfg);
 
   if (config.verbose) util.printHeader("Validating phrases");
@@ -25,7 +25,7 @@ exports.run = (cfg) => {
   } else {
     util.successMessage("Phrase consistency tested ok.");
   }
-};
+}
 
 function analyze(cfg) {
   config = cfg;
@@ -70,4 +70,4 @@ function analyze(cfg) {
 
   return results;
 }
-exports.analyze = analyze;
+export { analyze };

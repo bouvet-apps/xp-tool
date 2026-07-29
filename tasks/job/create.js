@@ -1,28 +1,30 @@
-const fs = require("fs");
-const fse = require("fs-extra");
-const path = require("path");
-const xml = require("pixl-xml");
-const util = require("../../lib/util");
+import fs from "fs";
+import fse from "fs-extra";
+import path from "path";
+import xml from "pixl-xml";
+import * as util from "../../lib/util/index.js";
 
 const { RESOURCE_DIR } = util;
 
 const type = "job";
 
-exports.getConfig = () => [
-  {
-    argument: "name",
-    type: "string",
-    message: "Enter name (no spaces)",
-    validate: util.VALIDATORS.nospace
-  }, {
-    argument: "cron",
-    type: "string",
-    message: "Enter cron schedule",
-    validate: util.VALIDATORS.cron
-  }
-];
+export function getConfig() {
+  return [
+    {
+      argument: "name",
+      type: "string",
+      message: "Enter name (no spaces)",
+      validate: util.VALIDATORS.nospace
+    }, {
+      argument: "cron",
+      type: "string",
+      message: "Enter cron schedule",
+      validate: util.VALIDATORS.cron
+    }
+  ];
+}
 
-exports.run = (config) => {
+export function run(config) {
   const name = config.name;
   const cron = config.cron;
 
@@ -88,4 +90,4 @@ exports.run = (config) => {
 
     util.successMessage(`Job with name '${name}' added to ${jobsFilename}`);
   }
-};
+}

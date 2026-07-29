@@ -1,10 +1,10 @@
-const util = require("../../lib/util");
-const checkMissingPhrases = require("./check-missing");
-const tidyPhrases = require("./tidy");
+import * as util from "../../lib/util/index.js";
+import * as checkMissingPhrases from "./check-missing.js";
+import * as tidyPhrases from "./tidy.js";
 
 // TODO: Move phrases analysis and manipulation to a new util library.
 
-exports.run = (cfg) => {
+export function run(cfg) {
   util.printHeader("Prune phrases");
   const results = checkMissingPhrases.analyze(cfg);
 
@@ -23,4 +23,4 @@ exports.run = (cfg) => {
   });
 
   tidyPhrases.tidy(cfg, phrasesToDelete);
-};
+}

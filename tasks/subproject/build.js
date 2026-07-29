@@ -1,13 +1,13 @@
 
-const fs = require("fs");
-const fse = require("fs-extra");
-const path = require("path");
-const util = require("../../lib/util");
-const subprojectUtil = require("../../lib/subproject");
+import fs from "fs";
+import fse from "fs-extra";
+import path from "path";
+import * as util from "../../lib/util/index.js";
+import * as subprojectUtil from "../../lib/subproject.js";
 
 const EXTEND_MARKER = "/* XP_TOOL_EXTEND_SOURCE */";
 
-exports.run = () => {
+export function run() {
   const baseProjectPath = path.resolve(subprojectUtil.subprojectDir, "../..");
   const subprojectPath = subprojectUtil.subprojectDir;
   const genPath = path.resolve(subprojectPath, "gen");
@@ -21,7 +21,7 @@ exports.run = () => {
     util.printHeader(`Subproject Entry ${entry.path}`);
     copyFromBaseProject(entry.path, baseProjectPath, genPath, subprojectPath, entry, 0);
   });
-};
+}
 
 function getSubprojectConfig(subprojectPath) { return JSON.parse(fs.readFileSync(path.resolve(subprojectPath, ".subproject.json"))); }
 

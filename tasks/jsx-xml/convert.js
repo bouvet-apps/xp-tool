@@ -1,41 +1,25 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const { relative, basename, extname } = require("path");
-const {
-  writeFile, readFile, unlink
-} = require("fs").promises;
-const glob = require("glob");
-const util = require("../../lib/util");
+import { relative, basename, extname } from "path";
+import { writeFile, readFile, unlink } from "fs/promises";
+import { sync as globSync } from "glob";
+import * as util from "../../lib/util/index.js";
 
-const { FILE_EXTENSION, XML_RENDER_OPTIONS } = require("../../lib/jsx-xml");
+import { FILE_EXTENSION, XML_RENDER_OPTIONS } from "../../lib/jsx-xml/index.js";
 
 const SITE_DIR = util.SITE_DIR;
 const globPath = `${SITE_DIR}/**/*.xml`;
 
-exports.getConfig = () => [
-  {
-    argument: "delete",
-    type: "string",
-    message: "Delete XML files after conversion? If so, answer 'DELETE' (without ticks)"
-  }
-];
-
-// Deprecated, TODO make unpack command for compacts
-// eslint-disable-next-line no-unused-vars
-const createTemplate = (config) => {
-  const {
-    name, content, isComponent, mixins
-  } = config;
-
-  return util.renderTemplate("boilerplate", FILE_EXTENSION, {
-    isComponent,
-    imports: mixins,
-    renderOptions: JSON.stringify(XML_RENDER_OPTIONS),
-    name,
-    content
-  });
-};
+export function getConfig() {
+  return [
+    {
+      argument: "delete",
+      type: "string",
+      message: "Delete XML files after conversion? If so, answer 'DELETE' (without ticks)"
+    }
+  ];
+}
 
 const createTemplateCompact = (config) => {
   const {
@@ -60,7 +44,7 @@ const capitalize = (s) => {
 // list-article -> ListArticle
 const processFileName = s => s.split("-").map(word => capitalize(word)).join("");
 
-const getAllFiles = () => glob.sync(globPath);
+const getAllFiles = () => globSync(globPath);
 
 const getPathToSite = (filePath) => {
   const path = relative(SITE_DIR, filePath);
@@ -127,7 +111,7 @@ const doReplace = (fileContent, isMixin) => {
       {
         match: /\n {2}/gmi,
         replace: "\n"
-      },
+      }
     );
   } else {
     toReplace.push(
@@ -184,11 +168,11 @@ const convertFile = async (filePath) => {
 
     const newPath = filePath.replace(".xml", FILE_EXTENSION);
     await writeFile(newPath, convertedFile);
-    console.log(`JSX converted file at ${relativePath}`);
+    util.successMessage(`JSX converted file at ${relativePath}`);
     return true;
   } catch (err) {
     util.errorMessage(`Failed to convert file at ${relativePath}`);
-    console.log(err);
+    console.error(err);
   }
   return false;
 };
@@ -222,12 +206,12 @@ const deleteFiles = async () => {
       util.warningMessage(`Deleted file at ${filePath}`);
     } catch (err) {
       util.errorMessage(`Failed to delete file at ${filePath}`);
-      console.log(err);
+      console.error(err);
     }
   }
 };
 
-exports.run = async (config) => {
+export async function run(config) {
   const shouldDelete = (config.delete || "") === "DELETE";
   util.printHeader("Converting XML files to JSX");
   if (shouldDelete) {

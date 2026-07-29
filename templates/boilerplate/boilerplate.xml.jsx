@@ -11,5 +11,5 @@ const {{name}} = {{#if isComponent}}({{#if props}}{ {{{props}}} }{{/if}}) => {{e
   <Fragment>
   {{{content}}}
   </Fragment>
-{{#unless isComponent}}, {{{renderOptions}}}{{/unless}});
+{{#unless isComponent}}).end({{{renderOptions}}}){{else}}){{/unless}};
 module.exports = {{name}}

@@ -1,6 +1,6 @@
-const util = require("../../lib/util");
+import * as util from "../../lib/util/index.js";
 
-exports.run = () => {
+export function run() {
   const xdata = util.getXData();
 
   util.printHeader(`X-Data (${xdata.length})`);
@@ -8,4 +8,4 @@ exports.run = () => {
   xdata.forEach((item) => {
     util.printBullet(item.name);
   });
-};
+}

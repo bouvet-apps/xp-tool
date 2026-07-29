@@ -1,11 +1,17 @@
-const xmlconvert = require("xml-js");
-const fs = require("fs");
-const fse = require("fs-extra");
-const Markdownit = require("markdown-it");
-const handlebars = require("handlebars");
-const propertiesReader = require("properties-reader");
-const path = require("path");
-const util = require("../../lib/util");
+import xmlconvert from "xml-js";
+import fs from "fs";
+import fse from "fs-extra";
+import Markdownit from "markdown-it";
+import handlebars from "handlebars";
+import propertiesReader from "properties-reader";
+import path from "path";
+import * as util from "../../lib/util/index.js";
+import markdownItAnchor from "markdown-it-anchor";
+import markdownItTableOfContents from "markdown-it-table-of-contents";
+import markdownItAttrs from "markdown-it-attrs";
+import markdownItDiv from "markdown-it-div";
+import { fileURLToPath } from "url";
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 // TODO: Move to config file
 /* const destination = {
@@ -42,7 +48,7 @@ let xdata;
 
 const config = util.getConfig();
 
-exports.run = ({ build = true }) => {
+export function run({ build = true }) {
   const languageCode = "no";
   // let languageCode = "en";
 
@@ -151,7 +157,7 @@ exports.run = ({ build = true }) => {
   TODO: allowPath+++ for all selector types
   TODO: max-length for textarea, textline
   */
-};
+}
 
 function processMixins(mixin, language) {
   const model = {
@@ -429,13 +435,13 @@ function renderTemplate(model, language) {
     breaks: true,
     xhtmlOut: true,
     typographer: true
-  }).use(require("markdown-it-anchor"), {})
-    .use(require("markdown-it-table-of-contents"), {
+  }).use(markdownItAnchor, {})
+    .use(markdownItTableOfContents, {
       includeLevel: [2, 3],
       format: heading => `${heading}<span class="header-extra"></span>`
     })
-    .use(require("markdown-it-attrs"))
-    .use(require("markdown-it-div"));
+    .use(markdownItAttrs)
+    .use(markdownItDiv);
 
   fse.writeFileSync(`${destination.adminToolDirectory}/${destination.adminToolFilename}`, md.render(output));
   util.successMessage("Rendered HTML documentation");

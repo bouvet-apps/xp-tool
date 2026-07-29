@@ -1,7 +1,7 @@
-const Table = require("cli-table");
-const util = require("../../lib/util");
+import Table from "cli-table";
+import * as util from "../../lib/util/index.js";
 
-exports.run = () => {
+export function run() {
   const languages = util.getLanguages();
 
   const table = new Table({
@@ -14,4 +14,4 @@ exports.run = () => {
     return "";
   });
   console.log(table.toString());
-};
+}

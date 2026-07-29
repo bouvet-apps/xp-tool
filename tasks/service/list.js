@@ -1,9 +1,9 @@
-const propertiesReader = require("properties-reader");
-const path = require("path");
-const Table = require("cli-table");
-const util = require("../../lib/util");
+import propertiesReader from "properties-reader";
+import path from "path";
+import Table from "cli-table";
+import * as util from "../../lib/util/index.js";
 
-exports.run = () => {
+export function run() {
   const services = util.getServices();
 
   util.printHeader(`Services (${services.length})`);
@@ -18,7 +18,7 @@ exports.run = () => {
     table.push([service.name, url]);
   });
   console.log(table.toString());
-};
+}
 
 function generateServiceUrl(service) {
   const properties = propertiesReader(path.join(util.CODE_DIR, "gradle.properties"));

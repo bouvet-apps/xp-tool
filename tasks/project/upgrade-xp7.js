@@ -1,14 +1,14 @@
-const fs = require("fs");
-const path = require("path");
-const xmlconvert = require("xml-js");
-const glob = require("glob");
-const util = require("../../lib/util");
-const { updateGradleProperties: updateXpVersion } = require("./set-xpversion");
+import fs from "fs";
+import path from "path";
+import xmlconvert from "xml-js";
+import { sync as globSync } from "glob";
+import * as util from "../../lib/util/index.js";
+import { updateGradleProperties as updateXpVersion } from "./set-xpversion.js";
 
 const XML_FILE_ENCODING = "utf8";
 
 
-exports.run = () => {
+export function run() {
   updateToForm();
   filterToProcessor();
   addXdataSite();
@@ -28,7 +28,7 @@ exports.run = () => {
   util.printBullet("Replace 'userStore' with 'idProvider' when using lib-auth, lib-context or lib-portal");
   util.printBullet("Split your PWA logic from main.js to '/src/main/resources/webapp/webapp.js'");
   util.printBullet("Widgets must be manually updated");
-};
+}
 
 
 function updateToForm() {
@@ -321,7 +321,7 @@ function updateLibPaths() {
   ];
 
   const globPath = `${util.RESOURCE_DIR}/**/*.+(es6|js)`;
-  const jsFiles = glob.sync(globPath);
+  const jsFiles = globSync(globPath);
 
   jsFiles.forEach((js) => {
     let jsFile = fs.readFileSync(js, "utf8");

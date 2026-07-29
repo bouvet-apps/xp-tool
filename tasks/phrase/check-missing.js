@@ -1,8 +1,8 @@
-const xmlconvert = require("xml-js");
-const fs = require("fs");
-const path = require("path");
-const glob = require("glob");
-const util = require("../../lib/util");
+import xmlconvert from "xml-js";
+import fs from "fs";
+import path from "path";
+import { sync as globSync } from "glob";
+import * as util from "../../lib/util/index.js";
 
 const XML_FILE_ENCODING = "utf8";
 const XML_OPTIONS = { compact: false, spaces: 4 };
@@ -41,7 +41,7 @@ const XML_DESCRIPTORS = [
 /**
  * Task entry point
  */
-exports.run = (cfg) => {
+export function run(cfg) {
   const results = analyze(cfg);
 
   // Print summary
@@ -71,7 +71,7 @@ exports.run = (cfg) => {
   } else {
     util.successMessage("Missing i18n phrases checked ok.");
   }
-};
+}
 
 let phrases;
 let config;
@@ -83,7 +83,7 @@ const results = {
   errors: 0
 };
 
-function analyze(cfg) {
+export function analyze(cfg) {
   config = cfg;
 
   let language = "en";
@@ -145,7 +145,6 @@ function analyze(cfg) {
 
   return results;
 }
-exports.analyze = analyze;
 
 
 /**
@@ -226,7 +225,7 @@ function checkYaml(filename, filePath, name, buildPath) {
  * @param {*} globPath Glob path to check
  */
 function checkJavascriptComments(globPath) {
-  const jsFiles = glob.sync(globPath);
+  const jsFiles = globSync(globPath);
   jsFiles.forEach((js) => {
     if (config.verbose) util.printHeader(`Processing file ${js}`);
 
@@ -237,11 +236,9 @@ function checkJavascriptComments(globPath) {
 
       let match;
       while ((match = regex.exec(jsFile)) != null) {
-        if (!match[1].startsWith()) {
-          phraseCommentToArray(match[1]).forEach((phrase) => {
-            validatePhrase(phrase.replace(/['"]+/g, ""));
-          });
-        }
+        phraseCommentToArray(match[1]).forEach((phrase) => {
+          validatePhrase(phrase.replace(/['"]+/g, ""));
+        });
       }
     } else {
       util.warningMessage(`Skipping file ${js} due to size.`);
@@ -256,7 +253,7 @@ function checkJavascriptComments(globPath) {
  * @param {*} globPath Glob path to check
  */
 function checkJavascriptPhrasesFiles(globPath) {
-  const jsFiles = glob.sync(globPath);
+  const jsFiles = globSync(globPath);
 
   jsFiles.forEach((js) => {
     if (config.verbose) util.printHeader(`Processing frontend script '${js}'`);
@@ -288,7 +285,7 @@ function checkJavascriptPhrasesFiles(globPath) {
  * [@localize locale=locale key='error.button'/] tags are checked.
  */
 function checkFreemarkerTemplates() {
-  const ftlFiles = glob.sync(`${util.SITE_DIR}/**/*.ftl`);
+  const ftlFiles = globSync(`${util.SITE_DIR}/**/*.ftl`);
 
   const localizeRegex = /\[@localize.*key=["'](.*)["'].*\]/gm;
   ftlFiles.forEach((ftlPath) => {
@@ -326,7 +323,7 @@ function checkElement(element, xmlPath = "") {
       validatePhrase(phraseKey);
     } else {
       const xp = `${xmlPath}/${getText(element)}`;
-      const lettersRegex = /[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF]/g;
+      const lettersRegex = /[a-zA-ZÀ-ɏḀ-ỿ]/g;
       if ((getText(element).match(lettersRegex) || []).length === 0) {
         if (config.verbose) util.warningMessage(`Ignoring missing i18n attribute for '${xp}' as it does not contain any letters`);
       } else if (xmlPath.endsWith("mixin/display-name")) {
