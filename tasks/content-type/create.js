@@ -8,17 +8,17 @@ const type = "content-type";
 
 export function getConfig() {
   return [
-  {
-    argument: "name",
-    type: "string",
-    message: "Enter name (no spaces)",
-    validate: util.VALIDATORS.nospace
-  }, {
-    argument: "displayName",
-    type: "phrase",
-    message: "Enter displayName"
-  }
-];
+    {
+      argument: "name",
+      type: "string",
+      message: "Enter name (no spaces)",
+      validate: util.VALIDATORS.nospace
+    }, {
+      argument: "displayName",
+      type: "phrase",
+      message: "Enter displayName"
+    }
+  ];
 }
 
 export function run(config) {

@@ -6,17 +6,17 @@ const type = "task";
 
 export function getConfig() {
   return [
-  {
-    argument: "name",
-    type: "string",
-    message: "Enter name (no spaces)",
-    validate: util.VALIDATORS.nospace
-  }, {
-    argument: "description",
-    type: "string",
-    message: "Enter description"
-  }
-];
+    {
+      argument: "name",
+      type: "string",
+      message: "Enter name (no spaces)",
+      validate: util.VALIDATORS.nospace
+    }, {
+      argument: "description",
+      type: "string",
+      message: "Enter description"
+    }
+  ];
 }
 
 export function run(config) {

@@ -5,12 +5,13 @@ import Markdownit from "markdown-it";
 import handlebars from "handlebars";
 import propertiesReader from "properties-reader";
 import path from "path";
-import * as util from "../../lib/util/index.js";
 import markdownItAnchor from "markdown-it-anchor";
 import markdownItTableOfContents from "markdown-it-table-of-contents";
 import markdownItAttrs from "markdown-it-attrs";
 import markdownItDiv from "markdown-it-div";
 import { fileURLToPath } from "url";
+import * as util from "../../lib/util/index.js";
+
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 // TODO: Move to config file

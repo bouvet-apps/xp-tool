@@ -232,4 +232,4 @@ export async function run(config) {
   util.printHeader("Xptool provides compiler and watcher for JSX files!");
   util.printBullet(`Running 'xptool jsx-xml build' will compile your *${FILE_EXTENSION} files in /site or /cms to XML in build folder`);
   util.printBullet(`Add 'xptool jsx-xml watch' to your npm scripts (or use xptool directly in terminal). This will watch all *${FILE_EXTENSION} files in /site or /cms and recompile when they or outbound dependencies are changed.`);
-};
+}
