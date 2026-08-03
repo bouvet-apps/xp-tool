@@ -84,8 +84,8 @@ export function run({ build = true }) {
     return mixin;
   });
 
-  // Load xdata
-  const xdataXml = filterXmlDescriptors(util.getXData({ build }), "x-data").map((x) => {
+  // Load form-fragments
+  const xdataXml = filterXmlDescriptors(util.getFormFragments({ build }), "form-fragment").map((x) => {
     const xd = {
       name: x.name,
       xdata: fs.readFileSync(path.resolve(x.path, x.filename), xmlFileEncoding)

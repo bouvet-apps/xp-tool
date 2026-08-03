@@ -43,7 +43,7 @@ export function run(config) {
       displayName: displayName && displayName.en ? displayName.en : name,
       displayName_i18n: `${name}.displayName`
     };
-    util.renderTemplate(type, "xml", model, path.resolve(targetDirectory, `${name}.xml`));
+    util.renderTemplate(type, "yaml", model, path.resolve(targetDirectory, `${name}.yaml`));
 
     util.addPhrase(model.displayName_i18n, displayName);
   });

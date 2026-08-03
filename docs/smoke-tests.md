@@ -1,24 +1,22 @@
 # Smoke Tests
 
-This repository has no formal automated test suite, but it includes a repeatable smoke-test script for key XP7/XP8 path handling.
+This repository has no formal automated test suite, but it includes a repeatable smoke-test script for key XP8 path handling and task output.
 
 ## What It Covers
 
-The script runs the most relevant commands in two fixtures:
+The script scaffolds a single XP8 fixture (`code/src/main/resources/cms`) and exercises:
 
-- XP7 fixture using `code/src/main/resources/site`
-- XP8 fixture using `code/src/main/resources/cms`
-
-Commands exercised per fixture:
-
-- `jsx-xml convert` (through task module)
+- `part create` — asserts it produces XP8 YAML output (`<name>.yaml` with `kind: "Part"` and the `{ text, i18n }` title), a `.es6` controller and a `.ftl` view, and appends the display-name phrase to `phrases.properties`
+- `part list` — asserts both hand-authored and generated parts are listed
 - `phrase list-languages`
 - `phrase check-missing`
 - `documentation generate`
 
-The XP8 fixture also includes YAML descriptors (`cms.yaml` site descriptor and a
+The fixture includes YAML descriptors (`cms.yaml` site descriptor and a
 `content-types/article/article.yaml`) to verify that `documentation generate`
-skips them gracefully instead of trying to parse YAML as XML.
+skips them gracefully instead of trying to parse YAML as XML, and a YAML-only
+phrase reference to verify `check-missing` marks it as used (so `prune` won't
+delete it).
 
 ## Run
 
@@ -31,8 +29,7 @@ npm run smoke
 ## Expected Result
 
 - Script exits with code `0`
-- Prints `PASS: XP7`, `PASS: XP8` and `All smoke tests passed.`
-- Generates `hello.xml.jsx` in each fixture under `.../parts/hello/`
+- Prints `PASS: XP8 part create`, `PASS: XP8 part list`, `PASS: XP8 read-only tasks`, `PASS: XP8 YAML i18n usage` and `All smoke tests passed.`
 
 ## Fixtures
 
@@ -45,7 +42,6 @@ clutter.
 
 The script is the single source of truth for the fixture contents:
 
-- `xp7-minimal` — `code/src/main/resources/site`
 - `xp8-minimal` — `code/src/main/resources/cms`
 
-These are intentionally minimal and only intended for smoke testing.
+This is intentionally minimal and only intended for smoke testing.

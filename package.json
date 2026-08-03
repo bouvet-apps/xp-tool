@@ -1,6 +1,6 @@
 {
   "name": "@bouvet-apps/xp-tool",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Enonic XP tools",
   "type": "module",
   "bin": {
@@ -28,7 +28,7 @@
     "fs-extra": "11.4.0",
     "glob": "13.0.6",
     "handlebars": "4.7.9",
-    "jsx-xml": "0.3.0",
+    "js-yaml": "4.1.0",
     "markdown-it": "14.3.0",
     "markdown-it-anchor": "9.2.1",
     "markdown-it-attrs": "5.0.1",

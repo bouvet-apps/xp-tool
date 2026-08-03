@@ -21,12 +21,12 @@ const XML_DESCRIPTORS = [
     files: util.getParts()
   },
   {
-    type: "x-data",
-    files: util.getXData()
-  },
-  {
     type: "mixin",
     files: util.getMixins()
+  },
+  {
+    type: "form-fragment",
+    files: util.getFormFragments()
   },
   {
     type: "pages",
