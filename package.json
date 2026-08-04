@@ -28,7 +28,7 @@
     "fs-extra": "11.4.0",
     "glob": "13.0.6",
     "handlebars": "4.7.9",
-    "jsx-xml": "0.3.0",
+    "jsx-xml": "0.4.0",
     "markdown-it": "14.3.0",
     "markdown-it-anchor": "9.2.1",
     "markdown-it-attrs": "5.0.1",
@@ -52,9 +52,6 @@
   },
   "engines": {
     "node": "^22.18.0 || >=24.11.0"
-  },
-  "overrides": {
-    "xmlbuilder2": "4.0.3"
   },
   "scripts": {
     "start": "node xptool.js",
