@@ -2,28 +2,14 @@ import fse from "fs-extra";
 import path from "path";
 import * as util from "../../lib/util/index.js";
 
-const type = "task";
+const type = "api";
 
-export function getConfig() {
-  return [
-    {
-      argument: "name",
-      type: "string",
-      message: "Enter name (no spaces)",
-      validate: util.VALIDATORS.nospace
-    }, {
-      argument: "description",
-      type: "string",
-      message: "Enter description"
-    }
-  ];
-}
+export function getConfig() { return [{ argument: "name", type: "string", message: "Enter name (no spaces)" }]; }
 
 export function run(config) {
   const name = config.name;
-  const description = config.description;
 
-  const targetDirectory = path.resolve(util.RESOURCE_DIR, `tasks/${name}`);
+  const targetDirectory = path.resolve(util.RESOURCE_DIR, `apis/${name}`);
 
   util.executeIfPathAvailable(targetDirectory, () => {
     util.printHeader(`Creating ${type} '${name}' in ${targetDirectory}`);
@@ -32,8 +18,7 @@ export function run(config) {
 
     // Create model for template
     const model = {
-      name: name,
-      description: description
+      name: name
     };
 
     // Render templates

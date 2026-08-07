@@ -16,14 +16,9 @@ npm start -- build generate-xptool-readme
 
 Do not hand-edit the generated task sections — they will be overwritten on the next run. Only the header section (above the first `##` heading) is static.
 
-## dist/components
+## Built-in JSX components
 
-`dist/components/` contains pre-transpiled CJS versions of the three built-in JSX components (`Summary`, `Image`, `Description`). These files are committed to git and are injected into every user-transpiled `.xml.jsx` file at build time, making the components available without an explicit import.
-
-They are generated from `templates/jsx/` by running:
-
-```
-node prepublish.js
-```
-
-This runs automatically before `npm publish` via the `prepublishOnly` script. If you change a built-in component template, run `node prepublish.js` and commit the updated `dist/components/` files alongside the template change.
+The `jsx-yaml` compiler ships three built-in documentation components (`Summary`,
+`Description`, `Image`). They live in [lib/jsx-yaml/runtime.cjs](../lib/jsx-yaml/runtime.cjs)
+and are made available to every compiled descriptor by the boilerplate wrapper — no
+explicit import and no pre-transpiled `dist/` artifacts are needed.

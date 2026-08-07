@@ -5,12 +5,13 @@ import Markdownit from "markdown-it";
 import handlebars from "handlebars";
 import propertiesReader from "properties-reader";
 import path from "path";
-import * as util from "../../lib/util/index.js";
 import markdownItAnchor from "markdown-it-anchor";
 import markdownItTableOfContents from "markdown-it-table-of-contents";
 import markdownItAttrs from "markdown-it-attrs";
 import markdownItDiv from "markdown-it-div";
 import { fileURLToPath } from "url";
+import * as util from "../../lib/util/index.js";
+
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 // TODO: Move to config file
@@ -31,6 +32,14 @@ const destination = {
 };
 
 const xmlFileEncoding = "utf8";
+
+const isXmlDescriptor = filename => Boolean(filename) && filename.toLowerCase().endsWith(".xml");
+
+const filterXmlDescriptors = (descriptors, label) => descriptors.filter((descriptor) => {
+  if (isXmlDescriptor(descriptor.filename)) return true;
+  util.warningMessage(`Skipping ${label} '${descriptor.name || descriptor.filename}' (XML required for documentation generation)`);
+  return false;
+});
 
 let phrases;
 let userdocPhrases;
@@ -54,11 +63,12 @@ export function run({ build = true }) {
 
   const model = {
     contentTypes: [],
-    parts: []
+    parts: [],
+    site: { fields: [] }
   };
 
   // Load mixins
-  const mixinsXml = util.getMixins({ build }).map((m) => {
+  const mixinsXml = filterXmlDescriptors(util.getMixins({ build }), "mixin").map((m) => {
     const mixin = {
       name: m.name,
       mixin: fs.readFileSync(path.resolve(m.path, m.filename), xmlFileEncoding)
@@ -74,8 +84,8 @@ export function run({ build = true }) {
     return mixin;
   });
 
-  // Load xdata
-  const xdataXml = util.getXData({ build }).map((x) => {
+  // Load form-fragments
+  const xdataXml = filterXmlDescriptors(util.getFormFragments({ build }), "form-fragment").map((x) => {
     const xd = {
       name: x.name,
       xdata: fs.readFileSync(path.resolve(x.path, x.filename), xmlFileEncoding)
@@ -95,7 +105,7 @@ export function run({ build = true }) {
 
   // process.exit();
 
-  const contentTypeXml = util.getContentTypes({ build }).map(ct => ({
+  const contentTypeXml = filterXmlDescriptors(util.getContentTypes({ build }), "content type").map(ct => ({
     name: ct.name,
     xml: fs.readFileSync(`${ct.path}/${ct.filename}`, xmlFileEncoding)
   }));
@@ -107,7 +117,7 @@ export function run({ build = true }) {
     )
   );
 
-  const partXml = util.getParts({ build }).map(part => fs.readFileSync(`${part.path}/${part.filename}`, xmlFileEncoding));
+  const partXml = filterXmlDescriptors(util.getParts({ build }), "part").map(part => fs.readFileSync(`${part.path}/${part.filename}`, xmlFileEncoding));
   model.parts = partXml.map(
     xml => generatePartModel(
       xmlconvert.xml2js(xml, xmlOptions),
@@ -115,7 +125,7 @@ export function run({ build = true }) {
     )
   );
 
-  const layoutXml = util.getLayouts({ build }).map(layout => fs.readFileSync(`${layout.path}/${layout.filename}`, xmlFileEncoding));
+  const layoutXml = filterXmlDescriptors(util.getLayouts({ build }), "layout").map(layout => fs.readFileSync(`${layout.path}/${layout.filename}`, xmlFileEncoding));
   model.layouts = layoutXml.map(
     xml => generateLayoutModel(
       xmlconvert.xml2js(xml, xmlOptions),
@@ -123,10 +133,17 @@ export function run({ build = true }) {
     )
   );
 
-  model.site = generateSiteModel(
-    xmlconvert.xml2js(fs.readFileSync(path.resolve(build ? util.BUILD_SITE_DIR : util.SITE_DIR, "site.xml"), xmlFileEncoding), xmlOptions),
-    languageCode
-  );
+  const [siteDescriptor] = util.getSite({ build });
+  if (siteDescriptor && siteDescriptor.filename.toLowerCase().endsWith(".xml")) {
+    model.site = generateSiteModel(
+      xmlconvert.xml2js(fs.readFileSync(path.resolve(siteDescriptor.path, siteDescriptor.filename), xmlFileEncoding), xmlOptions),
+      languageCode
+    );
+  } else if (siteDescriptor) {
+    util.warningMessage(`Skipping site descriptor '${siteDescriptor.filename}' (XML required for documentation generation)`);
+  } else {
+    util.warningMessage("No site descriptor found in /site or /cms");
+  }
 
   // Sort models by resolved i18n display names.
   model.contentTypes = model.contentTypes.sort(compareDisplayName);

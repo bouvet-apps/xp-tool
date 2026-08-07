@@ -2,11 +2,12 @@ import fs from "fs";
 import path from "path";
 import { createRequire } from "module";
 import { fileURLToPath } from "url";
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const require = createRequire(import.meta.url);
 
 import * as util from "../../lib/util/index.js";
 import { tasks } from "../../tasks.js";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const require = createRequire(import.meta.url);
 const { version } = require("../../package.json");
 
 export function run() {

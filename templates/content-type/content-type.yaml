@@ -1,0 +1,6 @@
+kind: "ContentType"
+superType: "base:structured"
+title:
+  text: "{{displayName}}"
+  i18n: "{{displayName_i18n}}"
+form: []
