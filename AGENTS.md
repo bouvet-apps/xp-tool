@@ -18,7 +18,7 @@ There are no automated tests. The `prepublishOnly` script runs `node prepublish.
 | [xptool.js](xptool.js) | CLI entry — parses args with `minimist`, routes to tasks |
 | [tasks.js](tasks.js) | Scans `tasks/` and builds task registry |
 | [lib/util/](lib/util/) | Shared utilities (paths, templates, i18n, console) |
-| [lib/jsx-xml/](lib/jsx-xml/) | JSX-to-XML Babel compiler |
+| [lib/jsx-yaml/](lib/jsx-yaml/) | JSX-to-YAML (XP8 descriptor) Babel compiler |
 | [lib/subproject.js](lib/subproject.js) | Subproject detection via `.subproject.json` |
 | [templates/](templates/) | Handlebars templates for generated files |
 | [i18n/](i18n/) | Tool's own i18n strings (not project i18n) |
@@ -54,7 +54,7 @@ Render via `util.renderTemplate(name, type, model, destination)` from [lib/util/
 
 ## i18n (Project Phrases)
 
-[lib/util/i18n.js](lib/util/i18n.js) manages Enonic XP project phrase files at `site/i18n/phrases.properties` (English) and `phrases_<code>.properties` (other languages). Use `addPhrase(key, phraseObject)` to append to all language files at once.
+[lib/util/i18n.js](lib/util/i18n.js) manages Enonic XP project phrase files at `site/i18n/phrases.properties` or `cms/i18n/phrases.properties` (English) and `phrases_<code>.properties` (other languages). Use `addPhrase(key, phraseObject)` to append to all language files at once.
 
 ## Adding a New Task
 

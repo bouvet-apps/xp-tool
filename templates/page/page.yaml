@@ -1,0 +1,8 @@
+# @summary[no]:
+# @summary[en]:
+kind: "Page"
+title:
+  text: "{{displayName}}"
+  i18n: "{{displayName_i18n}}"
+form: []
+regions: []

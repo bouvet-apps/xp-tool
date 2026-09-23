@@ -2,7 +2,7 @@ import propertiesReader from "properties-reader";
 import * as util from "../../lib/util/index.js";
 import * as validatePhrases from "./validate.js";
 
-const PHRASES_DIR = `${util.SITE_DIR}/i18n`;
+const PHRASES_DIR = `${util.RESOURCE_DIR}/i18n`;
 
 let config;
 
