@@ -24,17 +24,21 @@ scaffold_fixture() {
   mkdir -p "$root/code/src/docs/no"
 
   # Project phrases (used by list-languages, check-missing, part/create).
-  mkdir -p "$src/i18n"
-  cat > "$src/i18n/phrases.properties" <<'EOF'
+  # In XP8 these live at the resources root (resources/i18n), NOT under cms/.
+  local res="$root/code/src/main/resources"
+  mkdir -p "$res/i18n"
+  cat > "$res/i18n/phrases.properties" <<'EOF'
 part.hello.displayName = Hello part
 part.world.displayName = World part
 part.promo.displayName = Promo part
+news.headline.label = Headline
 site.displayName = Demo site
 EOF
-  cat > "$src/i18n/phrases_no.properties" <<'EOF'
+  cat > "$res/i18n/phrases_no.properties" <<'EOF'
 part.hello.displayName = Hei del
 part.world.displayName = Verden del
 part.promo.displayName = Promo del
+news.headline.label = Overskrift
 site.displayName = Demo side
 EOF
 
@@ -71,6 +75,28 @@ title: "Address"
 form: []
 EOF
 
+  # Content-type carrying @summary/@description comments — documentation
+  # generate must extract them from the YAML and render them into the markdown.
+  mkdir -p "$src/content-types/news"
+  cat > "$src/content-types/news/news.yaml" <<'EOF'
+# @summary[no]: Nyheter og pressemeldinger.
+# @summary[en]: News and press releases.
+kind: "ContentType"
+superType: "base:structured"
+title: "Nyheter"
+form:
+  - type: "TextLine"
+    name: "headline"
+    # @description[no]: Skriv en fengende overskrift.
+    # @description[en]: Write a catchy headline.
+    label:
+      text: "Overskrift"
+      i18n: "news.headline.label"
+    occurrences:
+      min: 1
+      max: 1
+EOF
+
   # gradle.properties — api/list reads appName from here to build API URLs.
   cat > "$root/code/gradle.properties" <<'EOF'
 appName = com.example.smoke
@@ -89,6 +115,10 @@ EOF
   # YAML content-type in build only — documentation generate must skip it.
   mkdir -p "$build/content-types/article"
   printf 'kind: ContentType\n' > "$build/content-types/article/article.yaml"
+
+  # Mirror the comment-bearing content-type into build (doc generate reads build).
+  mkdir -p "$build/content-types/news"
+  cp "$src/content-types/news/news.yaml" "$build/content-types/news/news.yaml"
 }
 
 run_node_task() {
@@ -132,7 +162,7 @@ assert_part_create() {
     echo "ERROR: hero.yaml missing i18n reference" >&2
     exit 1
   fi
-  if ! grep -q 'hero.displayName' "$cms/i18n/phrases.properties"; then
+  if ! grep -q 'hero.displayName' "$fixture/code/src/main/resources/i18n/phrases.properties"; then
     echo "ERROR: hero.displayName phrase not added" >&2
     exit 1
   fi
@@ -349,11 +379,41 @@ assert_component_lists() {
   echo "PASS: XP8 component lists"
 }
 
+# Verify documentation generate extracts @summary/@description comments from
+# YAML descriptors and renders them into the generated markdown. This is the
+# core of the XP8 rewrite — the old test only checked that generate did not
+# crash, never that the comments actually landed in the output.
+assert_doc_comment_extraction() {
+  local fixture="$1"
+  local md="$fixture/code/build/docs/documentation.md/documentation.md"
+
+  echo ""
+  echo "=== Smoke test: XP8 doc comment extraction ==="
+
+  run_node_task "$fixture" "tasks/documentation/generate.js" "run" "{}"
+
+  if [[ ! -f "$md" ]]; then
+    echo "ERROR: documentation generate did not produce $md" >&2
+    exit 1
+  fi
+  # Top-level @summary[no] must become the content-type description.
+  if ! grep -q 'Nyheter og pressemeldinger' "$md"; then
+    echo "ERROR: @summary[no] not rendered into the content-type description" >&2
+    exit 1
+  fi
+  # Field-level @description[no] must be tied to the right field.
+  if ! grep -q 'Skriv en fengende overskrift' "$md"; then
+    echo "ERROR: @description[no] not rendered for the headline field" >&2
+    exit 1
+  fi
+  echo "PASS: XP8 doc comment extraction"
+}
+
 # add → validate → tidy → prune. Guards the data-loss-critical prune path:
 # an unused phrase must be removed, a phrase referenced from YAML must be kept.
 assert_phrase_roundtrip() {
   local fixture="$1"
-  local phrases="$fixture/code/src/main/resources/cms/i18n/phrases.properties"
+  local phrases="$fixture/code/src/main/resources/i18n/phrases.properties"
 
   echo ""
   echo "=== Smoke test: XP8 phrase round-trip ==="
@@ -401,6 +461,7 @@ assert_more_creates "$FIXTURE_DIR"
 assert_jsx_yaml_build "$FIXTURE_DIR"
 assert_component_lists "$FIXTURE_DIR"
 run_readonly_tasks "$FIXTURE_DIR"
+assert_doc_comment_extraction "$FIXTURE_DIR"
 assert_yaml_i18n_used "$FIXTURE_DIR"
 assert_phrase_roundtrip "$FIXTURE_DIR"
 

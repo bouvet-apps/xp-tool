@@ -4,19 +4,22 @@ This repository has no formal automated test suite, but it includes a repeatable
 
 ## What It Covers
 
-The script scaffolds a single XP8 fixture (`code/src/main/resources/cms`) and exercises:
+The script scaffolds a single XP8 fixture (`code/src/main/resources`) and exercises:
 
 - `part create` — asserts it produces XP8 YAML output (`<name>.yaml` with `kind: "Part"` and the `{ text, i18n }` title), a `.es6` controller and a `.ftl` view, and appends the display-name phrase to `phrases.properties`
 - `part list` — asserts both hand-authored and generated parts are listed
 - `phrase list-languages`
 - `phrase check-missing`
 - `documentation generate`
+- **doc comment extraction** — asserts `documentation generate` pulls `@summary[lang]:` / `@description[lang]:` comments out of a YAML descriptor and renders them into the generated markdown (the content-type summary and a field description)
 
-The fixture includes YAML descriptors (`cms.yaml` site descriptor and a
-`content-types/article/article.yaml`) to verify that `documentation generate`
-skips them gracefully instead of trying to parse YAML as XML, and a YAML-only
-phrase reference to verify `check-missing` marks it as used (so `prune` won't
-delete it).
+The fixture places project phrases at the **resources root** (`resources/i18n/`),
+which is the XP8 standard location — not under `cms/`. It includes YAML
+descriptors (`cms.yaml` site descriptor and a `content-types/article/article.yaml`)
+to verify that `documentation generate` skips them gracefully instead of trying to
+parse YAML as XML, a `content-types/news/news.yaml` carrying `@summary`/`@description`
+comments to verify the extraction path, and a YAML-only phrase reference to verify
+`check-missing` marks it as used (so `prune` won't delete it).
 
 ## Run
 
@@ -29,7 +32,7 @@ npm run smoke
 ## Expected Result
 
 - Script exits with code `0`
-- Prints `PASS: XP8 part create`, `PASS: XP8 part list`, `PASS: XP8 read-only tasks`, `PASS: XP8 YAML i18n usage` and `All smoke tests passed.`
+- Prints `PASS: XP8 part create`, `PASS: XP8 part list`, `PASS: XP8 read-only tasks`, `PASS: XP8 doc comment extraction`, `PASS: XP8 YAML i18n usage` and `All smoke tests passed.`
 
 ## Fixtures
 
