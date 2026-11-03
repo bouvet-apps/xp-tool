@@ -59,7 +59,6 @@ function generateTask(type, action) {
     return "";
   }
 
-  /* eslint-disable-next-line no-prototype-builtins */
   if ("description" in task) {
     util.successMessage(`Generated documentation for task ${type}:${action}`);
     content += task.description;

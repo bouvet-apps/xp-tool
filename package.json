@@ -12,50 +12,52 @@
     "Ole Saggau",
     "Vigdis Tostrup-Hanto"
   ],
+  "scripts": {
+    "start": "node xptool.js",
+    "lint": "eslint .",
+    "prepublishOnly": "node prepublish.js"
+  },
   "dependencies": {
-    "@babel/core": "8.0.1",
+    "@babel/core": "8.1.0",
     "@babel/plugin-transform-react-jsx": "8.0.1",
-    "@babel/preset-env": "8.0.2",
-    "chalk": "6.0.0",
-    "chokidar": "5.0.0",
+    "@babel/preset-env": "8.0.7",
+    "chalk": "6.0.1",
+    "chokidar": "6.0.0",
     "cldr": "8.0.0",
     "cli-table": "0.3.11",
-    "cronstrue": "3.24.0",
+    "cronstrue": "3.37.0",
     "deepmerge": "4.3.1",
     "enquirer": "2.4.1",
     "figures": "6.1.0",
     "find-parent-dir": "0.3.1",
-    "fs-extra": "11.4.0",
-    "glob": "13.0.6",
+    "fs-extra": "11.4.1",
+    "glob": "14.0.3",
     "handlebars": "4.7.10",
     "jsx-xml": "0.4.0",
-    "markdown-it": "15.0.2",
-    "markdown-it-anchor": "9.2.1",
+    "markdown-it": "15.0.3",
+    "markdown-it-anchor": "10.0.0",
     "markdown-it-attrs": "5.0.1",
     "markdown-it-div": "1.1.0",
     "markdown-it-table-of-contents": "1.2.0",
-    "marked": "15.0.12",
-    "marked-terminal": "7.3.0",
+    "marked": "18.1.2",
+    "marked-terminal": "7.3.1",
     "minimist": "1.2.8",
     "natural-orderby": "5.0.0",
     "pixl-xml": "1.0.13",
-    "properties-reader": "2.2.0",
+    "properties-reader": "3.0.1",
     "xml-js": "1.6.11"
   },
   "devDependencies": {
-    "eslint": "8.57.1",
-    "eslint-config-airbnb": "19.0.4",
-    "eslint-plugin-import": "2.32.0",
-    "eslint-plugin-jsx-a11y": "6.10.2",
-    "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-react-hooks": "4.6.2"
+    "@eslint/js": "10.0.1",
+    "eslint": "10.14.0",
+    "globals": "17.14.0"
+  },
+  "overrides": {
+    "eslint@10.14.0": {
+      "minimatch": "11.0.4"
+    }
   },
   "engines": {
-    "node": "^22.18.0 || >=24.11.0"
-  },
-  "scripts": {
-    "start": "node xptool.js",
-    "lint": "eslint --ext=js .",
-    "prepublishOnly": "node prepublish.js"
+    "node": "^22.22.0 || >=24.11.0"
   }
 }

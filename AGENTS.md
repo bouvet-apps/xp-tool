@@ -5,7 +5,7 @@
 ## Commands
 
 ```bash
-npm run lint        # ESLint (airbnb config)
+npm run lint        # ESLint flat config (recommended rules)
 node xptool.js      # Run locally without global install
 ```
 

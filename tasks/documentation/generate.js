@@ -50,7 +50,9 @@ export function run({ build = true }) {
 
   // Load project phrases and tool phrases
   phrases = util.getPhrases(languageCode);
-  userdocPhrases = propertiesReader(path.resolve(__dirname, `../../i18n/userdoc${languageCode === "en" ? "" : `_${languageCode}`}.properties`));
+  userdocPhrases = propertiesReader({
+    sourceFile: path.resolve(__dirname, `../../i18n/userdoc${languageCode === "en" ? "" : `_${languageCode}`}.properties`)
+  });
 
   const model = {
     contentTypes: [],

@@ -33,7 +33,7 @@ export function run(cfg) {
 function getPhrase(key, languages) {
   let phrase = "";
   languages.some((language) => {
-    const properties = propertiesReader(`${PHRASES_DIR}/${language.filename}`);
+    const properties = propertiesReader({ sourceFile: `${PHRASES_DIR}/${language.filename}` });
     phrase = properties.get(key);
     return phrase != null;
   });

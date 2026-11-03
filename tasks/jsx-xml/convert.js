@@ -1,6 +1,5 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import { relative, basename } from "path";
 import { writeFile, readFile, unlink } from "fs/promises";
 import { sync as globSync } from "glob";
