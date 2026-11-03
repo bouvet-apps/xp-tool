@@ -116,7 +116,6 @@ if (args.help) {
 
   if (validateAction(type, action) && validateType(type)) {
     const taskDescriptor = tasks[type].filter(t => t.action === action)[0].descriptor;
-    /* eslint-disable-next-line no-prototype-builtins */
     if ("description" in taskDescriptor) {
       console.log(marked.parse(taskDescriptor.description));
     } else {
@@ -205,10 +204,10 @@ async function main() {
 
         config.verbose = verbose;
         config.args = args;
-        task.run(config);
+        await task.run(config);
       } else {
         const config = { verbose: verbose, args: args };
-        task.run(config);
+        await task.run(config);
       }
     }
   } catch (err) {

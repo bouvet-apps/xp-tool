@@ -32,9 +32,6 @@ export function run() {
 
 
 function updateToForm() {
-  const topToBeReplacedWithFormRegex = /<(site|layout|page|part|task|mixin|x-data) *.*>( |\n)*(<(display-name|super-type|is-abstract|is-final|allow-child-content|regions|allowContentType|mappings) *.*>(.|\n)*<\/(display-name|super-type|is-abstract|is-final|allow-child-content|regions|allowContentType|mappings)>)*( |\n)*(<(config|items)>)/gmi;
-  const bottomToBeReplacedWithFormRegex = /<\/(config|items)>( |\n)*(<(display-name|super-type|is-abstract|is-final|allow-child-content|regions|allowContentType|mappings) *.*>(.|\n)*<\/(display-name|super-type|is-abstract|is-final|allow-child-content|regions|allowContentType|mappings)>(.|\n)*)*<\/(site|layout|page|part|task|mixin|x-data)>/gmi;
-
   const opts = { build: false };
 
   // Load mixins
@@ -90,18 +87,6 @@ function updateToForm() {
     siteXml
   ];
 
-  const replaceTopWithForm = (...args) => {
-    const match = args[0];
-    const replaced = match.replace(/<(config|items)>/gmi, "<form>");
-    return replaced;
-  };
-
-  const replaceBottomWithForm = (...args) => {
-    const match = args[0];
-    const replaced = match.replace(/<\/(config|items)>/gmi, "</form>");
-    return replaced;
-  };
-
   xmlFiles.forEach((file) => {
     const {
       name, path: filedir, filename, xml
@@ -125,12 +110,14 @@ function updateToForm() {
     }
 
     const filePath = path.resolve(filedir, filename);
-    const newXml = xml.replace(topToBeReplacedWithFormRegex, replaceTopWithForm)
-      .replace(bottomToBeReplacedWithFormRegex, replaceBottomWithForm);
+    const document = xmlconvert.xml2js(xml, { compact: false, spaces: 4 });
+    const root = document.elements?.find(element => element.type === "element");
+    const legacyForm = root?.elements?.find(element => element.type === "element" && ["config", "items"].includes(element.name));
 
-    fs.writeFileSync(filePath, newXml);
-
-    if (newXml !== xml) {
+    if (legacyForm) {
+      legacyForm.name = "form";
+      const newXml = xmlconvert.json2xml(document, { compact: false, spaces: 4 });
+      fs.writeFileSync(filePath, newXml);
       util.successMessage(`Updated XML with name '${name}' from config to form`);
     } else {
       util.successMessage(`XML with name '${name}' had no need of changes`);
