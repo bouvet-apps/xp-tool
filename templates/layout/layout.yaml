@@ -1,0 +1,11 @@
+# @summary[no]:
+# @summary[en]:
+kind: "Layout"
+title:
+  text: "{{displayName}}"
+  i18n: "{{displayName_i18n}}"
+form: []
+regions:
+{{#regions}}
+  - "{{name}}"
+{{/regions}}

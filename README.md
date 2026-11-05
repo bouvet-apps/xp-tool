@@ -1,10 +1,28 @@
-# xptool
+# xptool 3.0.0
 ```xptool``` is a tool for daily development needs in Enonic XP.
 
 ```npm install -g @bouvet-apps/xp-tool```
 
 For development of xp-tool, see [development.md](./docs/development.md).
 
+## api:create
+Creates a universal API from a set of templates.
+
+
+**Syntax:**
+```
+xptool api create
+```  
+  
+## api:list
+Lists all universal APIs in the project.
+
+
+**Syntax:**
+```
+xptool api list
+```  
+  
 ## build:generate-xptool-readme
 Generates README.md for xptool.
 
@@ -12,8 +30,8 @@ Generates README.md for xptool.
 **Syntax:**
 ```
 xptool build generate-xptool-readme
-```
-
+```  
+  
 ## content-type:create
 Creates a content type from a set of templates.
 
@@ -21,8 +39,8 @@ Creates a content type from a set of templates.
 **Syntax:**
 ```
 xptool content-type create
-```
-
+```  
+  
 ## content-type:list
 Lists all content types in the project.
 
@@ -30,8 +48,8 @@ Lists all content types in the project.
 **Syntax:**
 ```
 xptool content-type list
-```
-
+```  
+  
 ## documentation:generate-legacy
 Generates user documentation for the project using XML files in /code dir.
 
@@ -41,8 +59,8 @@ The documentation will be generated to markdown in the build folder, and rendere
 **Syntax:**
 ```
 xptool documentation generate-legacy
-```
-
+```  
+  
 ## documentation:generate
 Generates user documentation for the project.
 
@@ -52,8 +70,17 @@ The documentation will be generated to markdown in the build folder, and rendere
 **Syntax:**
 ```
 xptool documentation generate
-```
+```  
+  
+## form-fragment:list
+Lists all form-fragments in the project.
 
+
+**Syntax:**
+```
+xptool form-fragment list
+```  
+  
 ## job:create
 Creates and schedules a job from a set of templates.
 
@@ -61,8 +88,8 @@ Creates and schedules a job from a set of templates.
 **Syntax:**
 ```
 xptool job create
-```
-
+```  
+  
 ## job:list
 Lists all jobs in the project.
 
@@ -70,35 +97,26 @@ Lists all jobs in the project.
 **Syntax:**
 ```
 xptool job list
-```
-
-## jsx-xml:build
-Compile all *.xml.jsx files to XML in build folder.
-
-
-**Syntax:**
-```
-xptool jsx-xml build
-```
-
-## jsx-xml:convert
-Converts all XML files in /site directory to JSX.
+```  
+  
+## jsx-yaml:build
+Compile all *.jsx descriptor files to XP8 YAML in build folder.
 
 
 **Syntax:**
 ```
-xptool jsx-xml convert
-```
-
-## jsx-xml:watch
-Starts a watcher on *.xml.jsx files
+xptool jsx-yaml build
+```  
+  
+## jsx-yaml:watch
+Starts a watcher on *.jsx descriptor files
 
 
 **Syntax:**
 ```
-xptool jsx-xml watch
-```
-
+xptool jsx-yaml watch
+```  
+  
 ## layout:create
 Creates a layout from a set of templates. The generated layout can have 1-12 columns.
 
@@ -106,8 +124,8 @@ Creates a layout from a set of templates. The generated layout can have 1-12 col
 **Syntax:**
 ```
 xptool layout create
-```
-
+```  
+  
 ## layout:list
 Lists all layouts in the project.
 
@@ -115,8 +133,8 @@ Lists all layouts in the project.
 **Syntax:**
 ```
 xptool layout list
-```
-
+```  
+  
 ## mixin:list
 Lists all mixins in the project.
 
@@ -124,8 +142,8 @@ Lists all mixins in the project.
 **Syntax:**
 ```
 xptool mixin list
-```
-
+```  
+  
 ## page:create
 Creates a page from a set of templates.
 
@@ -133,8 +151,8 @@ Creates a page from a set of templates.
 **Syntax:**
 ```
 xptool page create
-```
-
+```  
+  
 ## page:list
 Lists all pages in the project.
 
@@ -142,8 +160,8 @@ Lists all pages in the project.
 **Syntax:**
 ```
 xptool page list
-```
-
+```  
+  
 ## part:create
 Creates a part from a set of templates.
 
@@ -151,8 +169,8 @@ Creates a part from a set of templates.
 **Syntax:**
 ```
 xptool part create
-```
-
+```  
+  
 ## part:list
 Lists all parts in the project.
 
@@ -160,16 +178,16 @@ Lists all parts in the project.
 **Syntax:**
 ```
 xptool part list
-```
-
+```  
+  
 ## phrase:add
 Adds a phrase to all installed locales.
 
 **Syntax:**
 ```
 xptool phrase add
-```
-
+```  
+  
 ## phrase:check-missing
 Checks all phrases for usage. Reports both missing phrases and unused phrases.
 You can optionally specify a ```--language=no``` switch to force a check on a specific language file.
@@ -181,7 +199,7 @@ Loops through and checks phrase usage for the following:
 * X-data XML files
 * Mixin XML files
 * Page XML files
-* Site descriptor (site.xml)
+* Site descriptor (site.xml, site.yaml or cms.yaml)
 * Freemarker templates (*.ftl)
 * Backend javascript (*.es6/*.js)
 * Frontend javascript (*.es6/*.js/*.vue/*.jsx)
@@ -211,8 +229,8 @@ You can add a custom ```@phrases``` JSDoc comment for the functions where you ar
 **Syntax:**
 ```
 xptool phrase check-missing
-```
-
+```  
+  
 ## phrase:edit
 Edits a single phrase in all ```i18n/phrases[_language].properties``` files simultaneously.
 
@@ -220,16 +238,16 @@ Edits a single phrase in all ```i18n/phrases[_language].properties``` files simu
 **Syntax:**
 ```
 xptool phrase edit
-```
-
+```  
+  
 ## phrase:list-languages
-Lists all languages in the project. The list of languages is determined by reading the ```i18n/phrases[_language].properties``` files from the site directory.
+Lists all languages in the project. The list of languages is determined by reading the ```i18n/phrases[_language].properties``` files from the site or cms directory.
 
 **Syntax:**
 ```
 xptool phrase list-languages
-```
-
+```  
+  
 ## phrase:prune
 Cleans up ```i18n/phrases[_language].properties``` files by removing unused phrases.
 
@@ -237,8 +255,8 @@ Cleans up ```i18n/phrases[_language].properties``` files by removing unused phra
 **Syntax:**
 ```
 xptool phrase prune
-```
-
+```  
+  
 ## phrase:sync
 Checks consistency between all phrases files and adds any missing phrases to them.
 
@@ -246,8 +264,8 @@ Checks consistency between all phrases files and adds any missing phrases to the
 **Syntax:**
 ```
 xptool phrase sync
-```
-
+```  
+  
 ## phrase:tidy
 Sorts, groups and cleans up the ```i18n/phrases[_language].properties``` files.
 
@@ -260,8 +278,8 @@ The phrases are grouped in the following way:
 **Syntax:**
 ```
 xptool phrase tidy
-```
-
+```  
+  
 ## phrase:validate
 Checks consistency between all phrases files.
 
@@ -269,8 +287,8 @@ Checks consistency between all phrases files.
 **Syntax:**
 ```
 xptool phrase validate
-```
-
+```  
+  
 ## project:set-version
 Sets project version in gradle.properties.
 
@@ -278,8 +296,8 @@ Sets project version in gradle.properties.
 **Syntax:**
 ```
 xptool project set-version
-```
-
+```  
+  
 ## project:set-xpversion
 Sets Enonic XP version number in Dockerfile and gradle.properties. The version list is fetched from enonic/xp-app on Github, so only released and valid veresions are available.
 
@@ -287,35 +305,8 @@ Sets Enonic XP version number in Dockerfile and gradle.properties. The version l
 **Syntax:**
 ```
 xptool project set-xpversion
-```
-
-## project:upgrade-xp7
-Update project from XP6 to XP7 syntax and structure.
-
-
-**Syntax:**
-```
-xptool project upgrade-xp7
-```
-
-## service:create
-Creates a service from a set of templates.
-
-
-**Syntax:**
-```
-xptool service create
-```
-
-## service:list
-Lists all services in the project.
-
-
-**Syntax:**
-```
-xptool service list
-```
-
+```  
+  
 ## subproject:build
 Builds current subproject. You need to run this command from within a subproject folder.
 
@@ -323,8 +314,8 @@ Builds current subproject. You need to run this command from within a subproject
 **Syntax:**
 ```
 xptool subproject build
-```
-
+```  
+  
 ## subproject:watch
 Watches current subproject. You need to run this command from within a subproject folder.
 
@@ -332,8 +323,8 @@ Watches current subproject. You need to run this command from within a subprojec
 **Syntax:**
 ```
 xptool subproject watch
-```
-
+```  
+  
 ## task:create
 Creates a task from a set of templates.
 
@@ -341,8 +332,8 @@ Creates a task from a set of templates.
 **Syntax:**
 ```
 xptool task create
-```
-
+```  
+  
 ## task:list
 Lists all tasks in the project.
 
@@ -350,14 +341,5 @@ Lists all tasks in the project.
 **Syntax:**
 ```
 xptool task list
-```
-
-## xdata:list
-Lists all x-data in the project.
-
-
-**Syntax:**
-```
-xptool xdata list
-```
-
+```  
+  

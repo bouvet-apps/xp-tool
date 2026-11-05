@@ -1,16 +1,19 @@
-import xmlconvert from "xml-js";
 import fs from "fs";
 import fse from "fs-extra";
 import Markdownit from "markdown-it";
 import handlebars from "handlebars";
 import propertiesReader from "properties-reader";
 import path from "path";
-import * as util from "../../lib/util/index.js";
 import markdownItAnchor from "markdown-it-anchor";
 import markdownItTableOfContents from "markdown-it-table-of-contents";
 import markdownItAttrs from "markdown-it-attrs";
 import markdownItDiv from "markdown-it-div";
+import yaml from "js-yaml";
 import { fileURLToPath } from "url";
+import * as util from "../../lib/util/index.js";
+import { extractDocComments } from "../../lib/util/yaml-comments.js";
+import { buildFieldModel } from "../../lib/util/yaml-model.js";
+
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 // TODO: Move to config file
@@ -30,7 +33,7 @@ const destination = {
   adminToolImageDirectory: path.resolve(util.BASE_DIR, "code/build/resources/main/assets/images/userdoc")
 };
 
-const xmlFileEncoding = "utf8";
+const fileEncoding = "utf8";
 
 let phrases;
 let userdocPhrases;
@@ -40,11 +43,8 @@ let xdata;
 
 const config = util.getConfig();
 
-export function run({ build = true }) {
+export function run({ build = true } = {}) {
   const languageCode = "no";
-  // let languageCode = "en";
-
-  const xmlOptions = { compact: false, spaces: 4 };
 
   util.printHeader("Generating documentation");
 
@@ -54,311 +54,192 @@ export function run({ build = true }) {
 
   const model = {
     contentTypes: [],
-    parts: []
+    parts: [],
+    site: { fields: [] }
   };
 
   // Load mixins
-  const mixinsXml = util.getMixins({ build }).map((m) => {
-    const mixin = {
+  mixins = util.getMixins({ build }).map((m) => {
+    const { text, doc } = readDescriptor(m.path, m.filename);
+    util.infoMessage(`Processing mixin '${resolveDisplayName(doc, languageCode)}'`);
+    return {
       name: m.name,
-      mixin: fs.readFileSync(path.resolve(m.path, m.filename), xmlFileEncoding)
+      mixin: {
+        displayName: resolveDisplayName(doc, languageCode),
+        fields: buildFields(doc, text, languageCode)
+      }
     };
-    return mixin;
   });
 
-  mixins = mixinsXml.map((xml) => {
-    const mixin = {
-      name: xml.name,
-      mixin: processMixins(xmlconvert.xml2js(xml.mixin, xmlOptions), languageCode)
-    };
-    return mixin;
-  });
-
-  // Load xdata
-  const xdataXml = util.getXData({ build }).map((x) => {
-    const xd = {
+  // Load form-fragments
+  xdata = util.getFormFragments({ build }).map((x) => {
+    const { text, doc } = readDescriptor(x.path, x.filename);
+    util.infoMessage(`Processing form-fragment '${resolveDisplayName(doc, languageCode)}'`);
+    return {
       name: x.name,
-      xdata: fs.readFileSync(path.resolve(x.path, x.filename), xmlFileEncoding)
+      xdata: {
+        displayName: resolveDisplayName(doc, languageCode),
+        fields: buildFields(doc, text, languageCode)
+      },
+      allowContentTypes: (doc && doc.allowContentType) || []
     };
-    return xd;
   });
 
-  xdata = xdataXml.map((xml) => {
-    const x = processXData(xmlconvert.xml2js(xml.xdata, xmlOptions), languageCode);
-    const xd = {
-      name: xml.name,
-      xdata: x,
-      allowContentTypes: x.allowContentTypes
-    };
-    return xd;
+  // Content types
+  model.contentTypes = util.getContentTypes({ build }).map((ct) => {
+    const { text, doc } = readDescriptor(ct.path, ct.filename);
+    return generateContentTypeModel(doc, text, ct.name, languageCode);
   });
 
-  // process.exit();
+  // Parts
+  model.parts = util.getParts({ build }).map((part) => {
+    const { text, doc } = readDescriptor(part.path, part.filename);
+    return generatePartModel(doc, text, languageCode);
+  });
 
-  const contentTypeXml = util.getContentTypes({ build }).map(ct => ({
-    name: ct.name,
-    xml: fs.readFileSync(`${ct.path}/${ct.filename}`, xmlFileEncoding)
-  }));
-  model.contentTypes = contentTypeXml.map(
-    ct => generateContentTypeModel(
-      xmlconvert.xml2js(ct.xml, xmlOptions),
-      ct.name,
-      languageCode
-    )
-  );
+  // Layouts
+  model.layouts = util.getLayouts({ build }).map((layout) => {
+    const { text, doc } = readDescriptor(layout.path, layout.filename);
+    return generateLayoutModel(doc, text, languageCode);
+  });
 
-  const partXml = util.getParts({ build }).map(part => fs.readFileSync(`${part.path}/${part.filename}`, xmlFileEncoding));
-  model.parts = partXml.map(
-    xml => generatePartModel(
-      xmlconvert.xml2js(xml, xmlOptions),
-      languageCode
-    )
-  );
+  // Site descriptor
+  const [siteDescriptor] = util.getSite({ build });
+  if (siteDescriptor) {
+    const { text, doc } = readDescriptor(siteDescriptor.path, siteDescriptor.filename);
+    model.site = generateSiteModel(doc, text, languageCode);
+  } else {
+    util.warningMessage("No site descriptor found in /site or /cms");
+  }
 
-  const layoutXml = util.getLayouts({ build }).map(layout => fs.readFileSync(`${layout.path}/${layout.filename}`, xmlFileEncoding));
-  model.layouts = layoutXml.map(
-    xml => generateLayoutModel(
-      xmlconvert.xml2js(xml, xmlOptions),
-      languageCode
-    )
-  );
-
-  model.site = generateSiteModel(
-    xmlconvert.xml2js(fs.readFileSync(path.resolve(build ? util.BUILD_SITE_DIR : util.SITE_DIR, "site.xml"), xmlFileEncoding), xmlOptions),
-    languageCode
-  );
-
-  // Sort models by resolved i18n display names.
+  // Sort models by resolved display names.
   model.contentTypes = model.contentTypes.sort(compareDisplayName);
   model.parts = model.parts.sort(compareDisplayName);
 
   copyImages();
   renderTemplate(model, languageCode);
-
-  /*
-  TODO: ContentSelector allowContentType
-  TODO: Double, Long min max
-  TODO: allowPath+++ for all selector types
-  TODO: max-length for textarea, textline
-  */
 }
 
-function processMixins(mixin, language) {
-  const model = {
-    fields: []
-  };
+/**
+ * Read a descriptor file and return both the raw text (for comment extraction)
+ * and the parsed YAML document.
+ */
+function readDescriptor(dir, filename) {
+  const text = fs.readFileSync(path.resolve(dir, filename), fileEncoding);
+  return { text, doc: yaml.load(text) };
+}
 
-  const mixinElement = getElementByName(mixin, "mixin");
-
-  // Get fallback text for displayName
-  const displayNameElement = getElementByName(mixinElement, "display-name");
-  model.displayName = displayNameElement.elements[0].text;
-
-  util.infoMessage(`Processing mixin '${model.displayName}'`);
-
-  let itemsElement = getElementByName(mixinElement, "form"); // XP7
-  if (itemsElement === undefined) itemsElement = getElementByName(mixinElement, "items"); // XP6
-
-  if (itemsElement.elements) {
-    itemsElement.elements.forEach((element) => {
-      // const field = getField(element, language);
-      model.fields.push(...[].concat(getField(element, language)));
-    });
+/**
+ * Resolve the display name from a YAML `title` (string or {text, i18n}).
+ */
+function resolveDisplayName(doc, language) {
+  const title = doc && doc.title;
+  if (!title) return "";
+  if (typeof title === "string") return title;
+  if (title.i18n) {
+    const phrase = phrases.get(title.i18n);
+    if (phrase) return phrase;
   }
-
-  return model;
+  return title.text || "";
 }
 
-function processXData(xd, language) {
-  const model = {
-    fields: []
-  };
-
-  const xdataElement = getElementByName(xd, "x-data");
-
-  // Get fallback text for displayName
-  const displayNameElement = getElementByName(xdataElement, "display-name");
-  model.displayName = displayNameElement.elements[0].text;
-
-  util.infoMessage(`Processing x-data '${model.displayName}'`);
-
-  model.allowContentTypes = getElementArrayByName(xdataElement, "allowContentType").map(i => i.elements[0].text);
-
-  let itemsElement = getElementByName(xdataElement, "form"); // XP7
-  if (itemsElement === undefined) itemsElement = getElementByName(xdataElement, "items");
-
-  if (itemsElement.elements) {
-    itemsElement.elements.forEach((element) => {
-      // const field = getField(element, language);
-      model.fields.push(...[].concat(getField(element, language)));
-    });
-  }
-
-  return model;
+/**
+ * Build the fields array for a descriptor from its parsed form + raw comments.
+ */
+function buildFields(doc, rawText, language) {
+  const comments = extractDocComments(rawText);
+  const form = (doc && Array.isArray(doc.form)) ? doc.form : [];
+  return form.map((f) => buildFieldModel(f, comments, language, phrases, userdocPhrases));
 }
 
-function generateContentTypeModel(contentType, name, language) {
+/**
+ * Get the top-level (document root) summary/description comment, if any.
+ */
+function getTopLevelComment(rawText, tag, language) {
+  const comments = extractDocComments(rawText);
+  const match = comments.find(c => c.field === null && c.tag === tag && c.language === language);
+  return match ? match.text : "";
+}
+
+function generateContentTypeModel(doc, rawText, name, language) {
   const model = {
+    displayName: resolveDisplayName(doc, language),
     fields: []
   };
-
-  const contentTypeNode = getElementByName(contentType, "content-type");
-
-  // Get fallback text for displayName
-  const displayNameNode = getElementByName(contentTypeNode, "display-name");
-  model.displayName = displayNameNode.elements[0].text;
 
   util.infoMessage(`Processing content-type '${model.displayName}'`);
 
-  const phrase = getI18nText(displayNameNode, language);
-  if (phrase && phrase.length > 0) model.displayName = getI18nText(displayNameNode, language);
+  model.summary = getTopLevelComment(rawText, "summary", language);
 
-  const displayNameField = {
+  // displayName field (always first)
+  model.fields.push({
     name: userdocPhrases.get("displayName"),
     description: userdocPhrases.get("displayNameDescription"),
     max: 1,
     min: 1,
     requiredText: userdocPhrases.get("yes"),
     type: userdocPhrases.get("displayName")
-  };
-  model.fields.push(displayNameField);
-
-  model.summary = getTagContents(contentType, "summary", language);
-  model.image = getTagContents(contentType, "image");
-
-  // Loop through all fields in the content type
-  const formElement = getElementByName(contentTypeNode, "form");
-
-  if (formElement.elements) {
-    formElement.elements.forEach((element) => {
-      // const field = getField(element, language);
-      model.fields.push(...[].concat(getField(element, language)));
-    });
-  }
-
-  // Apply x-data
-  // Check if any x-data applies to this content type
-  const xdataMatches = [];
-
-  // TODO: Proper matching that includes Enonic's weird wildcard implementation
-  xdata.forEach((xd) => {
-    if (xd.allowContentTypes.includes(name)) {
-      xdataMatches.push(xd);
-      util.infoMessage(`${xd.name} x-data is allowed in ${name}, applying it`);
-    }
   });
 
-  if (xdataMatches.length > 0) {
-    xdataMatches.forEach((xd) => {
-      // Create a dummy field-set to mimic how the xdata actually works
-      const fieldset = {
+  model.fields.push(...buildFields(doc, rawText, language));
+
+  // Apply form-fragments that allow this content type
+  xdata.forEach((xd) => {
+    if (xd.allowContentTypes.includes(name)) {
+      util.infoMessage(`${xd.name} form-fragment is allowed in ${name}, applying it`);
+      model.fields.push({
         min: 0,
         max: 1,
         type: "FieldSet",
         name: xd.xdata.displayName,
         items: xd.xdata.fields
-      };
-      model.fields.push(fieldset);
-    });
-  }
+      });
+    }
+  });
 
   return model;
 }
 
-
-/**
- * Generate model for a part.
- *
- * @param {*} part Xml2json object containing the part
- * @param {*} language Language code
- */
-function generatePartModel(part, language) {
+function generatePartModel(doc, rawText, language) {
   const model = {
+    displayName: resolveDisplayName(doc, language),
     fields: []
   };
-
-  const partElement = getElementByName(part, "part");
-
-  // Get fallback text for displayName
-  const displayNameElement = getElementByName(partElement, "display-name");
-  model.displayName = displayNameElement.elements[0].text;
 
   util.infoMessage(`Processing part '${model.displayName}'`);
 
-  const phrase = getI18nText(displayNameElement, language);
-  if (phrase && phrase.length > 0) model.displayName = getI18nText(displayNameElement, language);
-
-  model.summary = getTagContents(part, "summary", language);
-  model.image = getTagContents(part, "image");
-
-  // Loop through all fields in the content type
-  let formElement = getElementByName(partElement, "form"); // XP7
-  if (formElement === undefined) formElement = getElementByName(partElement, "config"); // XP6
-
-  if (formElement.elements) {
-    formElement.elements.forEach((element) => {
-      // const field = getField(element, language);
-      model.fields.push(...[].concat(getField(element, language)));
-    });
-  }
+  model.summary = getTopLevelComment(rawText, "summary", language);
+  model.fields = buildFields(doc, rawText, language);
 
   return model;
 }
 
-function generateLayoutModel(layout, language) {
+function generateLayoutModel(doc, rawText, language) {
   const model = {
+    displayName: resolveDisplayName(doc, language),
     fields: []
   };
-
-  const layoutElement = getElementByName(layout, "layout");
-
-  // Get fallback text for displayName
-  const displayNameElement = getElementByName(layoutElement, "display-name");
-  model.displayName = displayNameElement.elements[0].text;
 
   util.infoMessage(`Processing layout '${model.displayName}'`);
 
-  const phrase = getI18nText(displayNameElement, language);
-  if (phrase && phrase.length > 0) model.displayName = getI18nText(displayNameElement, language);
-
-  model.summary = getTagContents(layout, "summary", language);
-  model.image = getTagContents(layout, "image");
-
-  // Loop through all config fields in the layout
-  let configElement = getElementByName(layoutElement, "form"); // XP7
-  if (configElement === undefined) configElement = getElementByName(layoutElement, "config"); // XP6
-
-  if (configElement.elements) {
-    configElement.elements.forEach((element) => {
-      // const field = getField(element, language);
-      model.fields.push(...[].concat(getField(element, language)));
-    });
-  }
+  model.summary = getTopLevelComment(rawText, "summary", language);
+  model.fields = buildFields(doc, rawText, language);
 
   return model;
 }
 
-function generateSiteModel(site, language) {
+function generateSiteModel(doc, rawText, language) {
   const model = {
     fields: []
   };
 
-  const siteElement = getElementByName(site, "site");
+  util.infoMessage("Processing site descriptor");
 
-  util.infoMessage("Processing site.xml");
-
-  // Loop through all config fields in the site
-  let configElement = getElementByName(siteElement, "form"); // XP7
-  if (configElement === undefined) configElement = getElementByName(siteElement, "config"); // XP6
-
-  if (configElement && configElement.elements) {
-    configElement.elements.forEach((element) => {
-      // const field = getField(element, language);
-      model.fields.push(...[].concat(getField(element, language)));
-    });
-  } else {
-    util.warningMessage("Config/form element does not exist or is empty in site.xml");
+  const form = (doc && Array.isArray(doc.form)) ? doc.form : [];
+  if (form.length === 0) {
+    util.warningMessage("Config/form element does not exist or is empty in site descriptor");
   }
+  model.fields = buildFields(doc, rawText, language);
 
   return model;
 }
@@ -399,13 +280,13 @@ function renderTemplate(model, language) {
   fse.ensureDirSync(destination.adminToolDirectory);
 
   // Register all partials.
-  templates.forEach(file => handlebars.registerPartial(file.name, fs.readFileSync(`${file.path}/${file.name}`, xmlFileEncoding)));
+  templates.forEach(file => handlebars.registerPartial(file.name, fs.readFileSync(`${file.path}/${file.name}`, fileEncoding)));
 
   const mainTemplate = templates.filter(file => file.name === mainTemplateFilename);
 
   let output;
   if (mainTemplate.length > 0) {
-    const template = handlebars.compile(fs.readFileSync(`${mainTemplate[0].path}/${mainTemplate[0].name}`, xmlFileEncoding));
+    const template = handlebars.compile(fs.readFileSync(`${mainTemplate[0].path}/${mainTemplate[0].name}`, fileEncoding));
     output = template(model);
   } else {
     util.errorMessage(`Main template '${mainTemplateFilename}' not found.`);
@@ -429,232 +310,6 @@ function renderTemplate(model, language) {
 
   fse.writeFileSync(`${destination.adminToolDirectory}/${destination.adminToolFilename}`, md.render(output));
   util.successMessage("Rendered HTML documentation");
-}
-
-/**
- * Get an element by name from the current root object.
- *
- * @returns {*} Element with the supplied name
- * @param {*} document Root object structure
- * @param {string} elementName Element name
- */
-function getElementByName(document, elementName) {
-  if (document.elements) {
-    const result = document.elements.filter(item => item.name === elementName);
-    return result[0];
-  }
-  return "";
-}
-
-/**
- * Returns field, with optional children. Runs recursively.
- *
- * @param {*} element Root object structure
- * @param {*} language Language code
- */
-function getField(element, language) {
-  const field = {
-    min: 0, // XP default
-    max: 1 // XP default
-  };
-
-  if (element.name === "option-set") {
-    field.type = "OptionSet";
-    if (element.elements && element.elements.length > 0) {
-      field.options = [];
-
-      const optionsElement = getElementByName(element, "options");
-
-      // Loop through options-elements
-      optionsElement.elements.forEach((optionElement) => {
-        const option = {
-          fields: []
-        };
-
-        option.label = getI18nText(getElementByName(optionElement, "label"), language);
-        option.description = getTagContents(optionElement, "description", language);
-        option.image = getTagContents(optionElement, "image");
-
-        const itemsElement = getElementByName(optionElement, "items");
-        if (itemsElement) {
-          itemsElement.elements.forEach(
-            inputElement => option.fields.push(...[].concat(getField(inputElement, language)))
-          );
-        }
-
-        field.options.push(option);
-      });
-    }
-  } else if (element.name === "field-set") {
-    field.type = "FieldSet";
-
-    if (element.elements && element.elements.length > 0) {
-      field.items = [];
-
-      const itemsElement = getElementByName(element, "items");
-
-      itemsElement.elements.forEach(
-        inputElement => field.items.push(...[].concat(getField(inputElement, language)))
-      );
-    }
-  } else if (element.name === "item-set") {
-    field.type = "ItemSet";
-
-    if (element.elements && element.elements.length > 0) {
-      field.items = [];
-
-      const itemsElement = getElementByName(element, "items");
-
-      itemsElement.elements.forEach(
-        inputElement => field.items.push(...[].concat(getField(inputElement, language)))
-      );
-    }
-  } else if (element.name === "inline") {
-    field.type = "Mixin";
-    let mixinName;
-    if (element.attributes && element.attributes.mixin) {
-      mixinName = element.attributes.mixin;
-    }
-    const mixin = mixins.filter(v => v.name === mixinName);
-    return mixin[0].mixin.fields; // Returns an array of fields.
-  }
-
-  field.description = getTagContents(element, "description", language);
-  field.image = getTagContents(element, "image");
-  // field.name = getI18nText(getElementByName(element, "label"));
-  const labelElement = getElementByName(element, "label");
-  if (labelElement) {
-    field.name = getI18nText(labelElement);
-  }
-
-  // Check required
-  const occurrencesNode = getElementByName(element, "occurrences");
-
-  if (occurrencesNode) {
-    const minOccurrences = occurrencesNode.attributes.minimum;
-    const maxOccurrences = occurrencesNode.attributes.maximum;
-
-    if (minOccurrences === maxOccurrences && minOccurrences > 0) {
-      field.other = userdocPhrases.get("required");
-      field.requiredText = userdocPhrases.get("yes");
-    } else {
-      field.requiredText = userdocPhrases.get("no");
-    }
-    if (minOccurrences === maxOccurrences && minOccurrences === 0) field.other = userdocPhrases.get("infinite");
-    field.max = (maxOccurrences === 0) ? userdocPhrases.get("infinite") : maxOccurrences;
-    field.min = minOccurrences;
-  }
-
-  // Get type
-  if (!field.type) field.type = (element.attributes && element.attributes.type) ? element.attributes.type : "";
-
-  // Process RadioButton options
-  if (field.type.toLowerCase() === "radiobutton" || field.type.toLowerCase() === "combobox") {
-    let configElement = getElementByName(element, "form"); // XP7
-    if (configElement === undefined) configElement = getElementByName(element, "config"); // XP6
-    const defaultElement = getElementByName(element, "default");
-
-    let defaultOption = "";
-    if (defaultElement && defaultElement.elements && defaultElement.elements[0].text) {
-      defaultOption = defaultElement.elements[0].text;
-    }
-
-    if (configElement.elements && configElement.elements.length > 0) {
-      field.configOptions = [];
-      let description = "";
-
-      configElement.elements.forEach((option) => {
-        if (option.name === "option") {
-          const optionTitle = `${option.elements[0].text}${option.attributes && option.attributes.value === defaultOption ? " (standard)" : ""}`;
-
-          field.configOptions.push({ option: optionTitle, description: description });
-
-          // Reset documentation comment, we've hit the actual option here.
-          description = "";
-        } else if (option.type === "comment") {
-          const tag = getTag("description", language);
-
-          // Check if we have the correct language
-          if (option.comment && option.comment.length > 0 && option.comment.indexOf(tag) > -1) {
-            description = option.comment.replace(tag, "").replace(/^\s*/gm, "");
-          }
-        }
-      });
-    }
-  }
-
-  return field;
-}
-
-/**
- * Get equally named elements by name from the current root object and return an array.
- *
- * @returns {*} Element array with the supplied name
- * @param {*} document Root object structure
- * @param {string} elementName Element name
- */
-function getElementArrayByName(document, elementName) {
-  if (document.elements) {
-    const result = document.elements.filter(item => item.name === elementName);
-    return result;
-  }
-  return [];
-}
-
-/**
- * Get i18n translated text for the current element with an i18n attribute.
- *
- * @param {*} element Element object
- */
-function getI18nText(element) {
-  if (!(element.attributes && element.attributes.i18n)) {
-    if (!element.elements) return "";
-    util.warningMessage(`WARNING: No i18n field for '${element.elements[0].text}'`);
-    return element.elements[0].text;
-  }
-
-  const phrase = phrases.get(element.attributes.i18n);
-  if (!phrase) {
-    util.warningMessage(`WARNING: i18n key '${element.attributes.i18n}' not found for language in '${element.elements[0].text}'`);
-    return element.elements[0].text;
-  }
-  return phrase;
-}
-
-/**
- * Get documentation comment tag contents from the current root object with the specified tag
- * name and optional language.
- *
- * @returns {string} Contents of documentation tag
- * @param {*} element Root object structure
- * @param {*} tag Tag name
- * @param {*} language Optional language code
- */
-function getTagContents(element, tag, language) {
-  const _tag = getTag(tag, language);
-  if (element.elements) {
-    const result = element.elements.filter((item) => {
-      if (item.type !== "comment") return false;
-      return (item.comment.indexOf(_tag) !== -1);
-    }).map(item => item.comment.replace(_tag, "").replace(/^\s*/gm, ""));
-
-    if (tag === "image" && result.length > 0) return result;
-    if (result[0]) return result[0];
-  }
-  util.warningMessage(`WARNING: No ${tag} documentation comment.`);
-  return "";
-}
-
-/**
- * Format a documentation tag.
- *
- * @returns Documentation tag string.
- * @param {*} tag
- * @param {*} language
- */
-function getTag(tag, language) {
-  if (language) return `@${tag}[${language}]:`;
-  return `@${tag}:`;
 }
 
 /**
@@ -685,6 +340,9 @@ function getAllTemplates(language) {
  * @param {*} directory Directory to get templates from
  */
 function getTemplates(directory) {
+  if (!fs.existsSync(directory)) {
+    return [];
+  }
   let files = fs.readdirSync(directory);
   files = files.filter(file => file.endsWith(".md"))
     .map(file => ({ name: file, path: directory }));

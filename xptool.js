@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { createRequire } from "module";
-import { fileURLToPath } from "url";
 import minimist from "minimist";
 import Enquirer from "enquirer";
 import { marked } from "marked";
@@ -10,7 +9,6 @@ import chalk from "chalk";
 import { tasks } from "./tasks.js";
 import { getLanguages, printHeader } from "./lib/util/index.js";
 
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json");
 
@@ -66,7 +64,7 @@ function getComponentPath(type, action) {
  * Get task component by type and action.
  */
 async function getComponent(type, action) {
-  return await import(getComponentPath(type, action));
+  return import(getComponentPath(type, action));
 }
 
 /**

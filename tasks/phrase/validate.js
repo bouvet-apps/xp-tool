@@ -2,7 +2,7 @@ import propertiesReader from "properties-reader";
 import chalk from "chalk";
 import * as util from "../../lib/util/index.js";
 
-const PHRASES_DIR = `${util.SITE_DIR}/i18n`;
+const PHRASES_DIR = `${util.RESOURCE_DIR}/i18n`;
 
 let config;
 
