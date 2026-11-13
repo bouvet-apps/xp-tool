@@ -2,6 +2,6 @@
 # @summary[en]:
 kind: "Part"
 title:
-  text: "{{displayName}}"
-  i18n: "{{displayName_i18n}}"
+  text: {{yaml displayName}}
+  i18n: {{yaml displayName_i18n}}
 form: []
