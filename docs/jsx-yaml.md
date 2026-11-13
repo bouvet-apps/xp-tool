@@ -62,7 +62,7 @@ Two kinds of tags:
 | `<title i18n>` | descriptor `title` (localizable) |
 | `<description>` | descriptor `description` |
 | `<label i18n>` | item `label` (localizable) |
-| `<help i18n>` | item `help-text` (localizable) |
+| `<help i18n>` | item `helpText` (localizable) |
 | `<occurrences min max/>` | item `occurrences` |
 | `<default value/>` | item `default` |
 | `<region name/>` | a layout/page region |
