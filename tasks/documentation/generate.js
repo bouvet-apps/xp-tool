@@ -12,7 +12,7 @@ import yaml from "js-yaml";
 import { fileURLToPath } from "url";
 import * as util from "../../lib/util/index.js";
 import { extractDocComments } from "../../lib/util/yaml-comments.js";
-import { buildFieldModel } from "../../lib/util/yaml-model.js";
+import { buildFieldModel, getImages } from "../../lib/util/yaml-model.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -39,7 +39,7 @@ let phrases;
 let userdocPhrases;
 
 let mixins;
-let xdata;
+let formFragments;
 
 const config = util.getConfig();
 
@@ -58,56 +58,56 @@ export function run({ build = true } = {}) {
     site: { fields: [] }
   };
 
-  // Load mixins
-  mixins = util.getMixins({ build }).map((m) => {
-    const { text, doc } = readDescriptor(m.path, m.filename);
-    util.infoMessage(`Processing mixin '${resolveDisplayName(doc, languageCode)}'`);
-    return {
-      name: m.name,
-      mixin: {
-        displayName: resolveDisplayName(doc, languageCode),
-        fields: buildFields(doc, text, languageCode)
-      }
-    };
+  // Form-fragments are inlined wherever a `type: FormFragment` field references them
+  formFragments = {};
+  withDescriptor(util.getFormFragments({ build })).forEach((f) => {
+    formFragments[f.name] = readDescriptor(f.path, f.filename);
   });
 
-  // Load form-fragments
-  xdata = util.getFormFragments({ build }).map((x) => {
-    const { text, doc } = readDescriptor(x.path, x.filename);
-    util.infoMessage(`Processing form-fragment '${resolveDisplayName(doc, languageCode)}'`);
-    return {
-      name: x.name,
-      xdata: {
-        displayName: resolveDisplayName(doc, languageCode),
-        fields: buildFields(doc, text, languageCode)
-      },
-      allowContentTypes: (doc && doc.allowContentType) || []
-    };
+  const [siteDescriptor] = util.getSite({ build });
+  const site = siteDescriptor ? readDescriptor(siteDescriptor.path, siteDescriptor.filename) : null;
+  const mixinMappings = (site && site.doc && Array.isArray(site.doc.mixins)) ? site.doc.mixins : [];
+  const appName = propertiesReader(path.resolve(util.CODE_DIR, "gradle.properties")).get("appName");
+
+  // Only mixins mapped in the site descriptor are shown in Content Studio
+  mixins = withDescriptor(util.getMixins({ build })).flatMap((m) => {
+    const mapping = mixinMappings.find((mm) => localName(mm.name) === m.name);
+    if (!mapping) return [];
+
+    const { text, doc } = readDescriptor(m.path, m.filename);
+    const displayName = resolveDisplayName(doc);
+    util.infoMessage(`Processing mixin '${displayName}'`);
+    return [{
+      name: m.name,
+      displayName,
+      fields: buildFields(doc, text, languageCode),
+      // XP8 matches `allowContentTypes` against the qualified content-type name
+      allows: (contentType) => !mapping.allowContentTypes
+        || new RegExp(`^(?:${mapping.allowContentTypes})$`).test(`${appName}:${contentType}`)
+    }];
   });
 
   // Content types
-  model.contentTypes = util.getContentTypes({ build }).map((ct) => {
+  model.contentTypes = withDescriptor(util.getContentTypes({ build })).map((ct) => {
     const { text, doc } = readDescriptor(ct.path, ct.filename);
     return generateContentTypeModel(doc, text, ct.name, languageCode);
   });
 
   // Parts
-  model.parts = util.getParts({ build }).map((part) => {
+  model.parts = withDescriptor(util.getParts({ build })).map((part) => {
     const { text, doc } = readDescriptor(part.path, part.filename);
     return generatePartModel(doc, text, languageCode);
   });
 
   // Layouts
-  model.layouts = util.getLayouts({ build }).map((layout) => {
+  model.layouts = withDescriptor(util.getLayouts({ build })).map((layout) => {
     const { text, doc } = readDescriptor(layout.path, layout.filename);
     return generateLayoutModel(doc, text, languageCode);
   });
 
   // Site descriptor
-  const [siteDescriptor] = util.getSite({ build });
-  if (siteDescriptor) {
-    const { text, doc } = readDescriptor(siteDescriptor.path, siteDescriptor.filename);
-    model.site = generateSiteModel(doc, text, languageCode);
+  if (site) {
+    model.site = generateSiteModel(site.doc, site.text, languageCode);
   } else {
     util.warningMessage("No site descriptor found in /site or /cms");
   }
@@ -118,6 +118,17 @@ export function run({ build = true } = {}) {
 
   copyImages();
   renderTemplate(model, languageCode);
+}
+
+/**
+ * Drop objects without a descriptor file, e.g. a `.jsx` component that has not been compiled yet.
+ */
+function withDescriptor(objects) {
+  return objects.filter((o) => {
+    if (fs.existsSync(path.resolve(o.path, o.filename))) return true;
+    util.warningMessage(`No descriptor found for '${o.name}', skipping (run 'xptool jsx-yaml build' first if it is a .jsx)`);
+    return false;
+  });
 }
 
 /**
@@ -132,7 +143,7 @@ function readDescriptor(dir, filename) {
 /**
  * Resolve the display name from a YAML `title` (string or {text, i18n}).
  */
-function resolveDisplayName(doc, language) {
+function resolveDisplayName(doc) {
   const title = doc && doc.title;
   if (!title) return "";
   if (typeof title === "string") return title;
@@ -147,9 +158,42 @@ function resolveDisplayName(doc, language) {
  * Build the fields array for a descriptor from its parsed form + raw comments.
  */
 function buildFields(doc, rawText, language) {
-  const comments = extractDocComments(rawText);
-  const form = (doc && Array.isArray(doc.form)) ? doc.form : [];
+  const usedFragments = new Set();
+  const form = expandFormFragments((doc && Array.isArray(doc.form)) ? doc.form : [], usedFragments);
+  const comments = [rawText, ...[...usedFragments].map((f) => f.text)].flatMap(extractDocComments);
   return form.map((f) => buildFieldModel(f, comments, language, phrases, userdocPhrases));
+}
+
+/** `app:name` or `name` → `name` */
+function localName(name) { return String(name).split(":").pop(); }
+
+/**
+ * Replace `type: FormFragment` items with the fragment's own form items, recursively.
+ */
+function expandFormFragments(items, usedFragments) {
+  return items.flatMap((item) => {
+    if (!item || typeof item !== "object") return [item];
+
+    if (item.type === "FormFragment") {
+      const fragment = formFragments[localName(item.name)];
+      if (!fragment) {
+        util.warningMessage(`Form-fragment '${item.name}' not found`);
+        return [];
+      }
+      usedFragments.add(fragment);
+      const fragmentForm = (fragment.doc && Array.isArray(fragment.doc.form)) ? fragment.doc.form : [];
+      return expandFormFragments(fragmentForm, usedFragments);
+    }
+
+    const expanded = { ...item };
+    if (Array.isArray(item.items)) expanded.items = expandFormFragments(item.items, usedFragments);
+    if (Array.isArray(item.options)) {
+      expanded.options = item.options.map((opt) => (Array.isArray(opt.items)
+        ? { ...opt, items: expandFormFragments(opt.items, usedFragments) }
+        : opt));
+    }
+    return [expanded];
+  });
 }
 
 /**
@@ -163,13 +207,14 @@ function getTopLevelComment(rawText, tag, language) {
 
 function generateContentTypeModel(doc, rawText, name, language) {
   const model = {
-    displayName: resolveDisplayName(doc, language),
+    displayName: resolveDisplayName(doc),
     fields: []
   };
 
   util.infoMessage(`Processing content-type '${model.displayName}'`);
 
   model.summary = getTopLevelComment(rawText, "summary", language);
+  model.image = getImages(extractDocComments(rawText), null);
 
   // displayName field (always first)
   model.fields.push({
@@ -183,16 +228,16 @@ function generateContentTypeModel(doc, rawText, name, language) {
 
   model.fields.push(...buildFields(doc, rawText, language));
 
-  // Apply form-fragments that allow this content type
-  xdata.forEach((xd) => {
-    if (xd.allowContentTypes.includes(name)) {
-      util.infoMessage(`${xd.name} form-fragment is allowed in ${name}, applying it`);
+  // Apply mixins mapped to this content type
+  mixins.forEach((mixin) => {
+    if (mixin.allows(name)) {
+      util.infoMessage(`${mixin.name} mixin is allowed in ${name}, applying it`);
       model.fields.push({
         min: 0,
         max: 1,
         type: "FieldSet",
-        name: xd.xdata.displayName,
-        items: xd.xdata.fields
+        name: mixin.displayName,
+        items: mixin.fields
       });
     }
   });
@@ -202,13 +247,14 @@ function generateContentTypeModel(doc, rawText, name, language) {
 
 function generatePartModel(doc, rawText, language) {
   const model = {
-    displayName: resolveDisplayName(doc, language),
+    displayName: resolveDisplayName(doc),
     fields: []
   };
 
   util.infoMessage(`Processing part '${model.displayName}'`);
 
   model.summary = getTopLevelComment(rawText, "summary", language);
+  model.image = getImages(extractDocComments(rawText), null);
   model.fields = buildFields(doc, rawText, language);
 
   return model;
@@ -216,13 +262,14 @@ function generatePartModel(doc, rawText, language) {
 
 function generateLayoutModel(doc, rawText, language) {
   const model = {
-    displayName: resolveDisplayName(doc, language),
+    displayName: resolveDisplayName(doc),
     fields: []
   };
 
   util.infoMessage(`Processing layout '${model.displayName}'`);
 
   model.summary = getTopLevelComment(rawText, "summary", language);
+  model.image = getImages(extractDocComments(rawText), null);
   model.fields = buildFields(doc, rawText, language);
 
   return model;
