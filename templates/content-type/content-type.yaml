@@ -1,0 +1,6 @@
+kind: "ContentType"
+superType: "base:structured"
+title:
+  text: {{yaml displayName}}
+  i18n: {{yaml displayName_i18n}}
+form: []

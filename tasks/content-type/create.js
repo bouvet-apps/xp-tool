@@ -8,17 +8,17 @@ const type = "content-type";
 
 export function getConfig() {
   return [
-  {
-    argument: "name",
-    type: "string",
-    message: "Enter name (no spaces)",
-    validate: util.VALIDATORS.nospace
-  }, {
-    argument: "displayName",
-    type: "phrase",
-    message: "Enter displayName"
-  }
-];
+    {
+      argument: "name",
+      type: "string",
+      message: "Enter name (no spaces)",
+      validate: util.VALIDATORS.nospace
+    }, {
+      argument: "displayName",
+      type: "phrase",
+      message: "Enter displayName"
+    }
+  ];
 }
 
 export function run(config) {
@@ -43,7 +43,7 @@ export function run(config) {
       displayName: displayName && displayName.en ? displayName.en : name,
       displayName_i18n: `${name}.displayName`
     };
-    util.renderTemplate(type, "xml", model, path.resolve(targetDirectory, `${name}.xml`));
+    util.renderTemplate(type, "yaml", model, path.resolve(targetDirectory, `${name}.yaml`));
 
     util.addPhrase(model.displayName_i18n, displayName);
   });

@@ -40,7 +40,7 @@ export function run(config) {
     };
 
     // Render templates
-    util.renderTemplate(type, "xml", model, `${targetDirectory}/${name}.xml`);
+    util.renderTemplate(type, "yaml", model, `${targetDirectory}/${name}.yaml`);
     util.renderTemplate(type, "es6", model, `${targetDirectory}/${name}.es6`);
     util.renderTemplate(type, "ftl", model, `${targetDirectory}/${name}.ftl`);
 

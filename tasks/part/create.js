@@ -8,17 +8,17 @@ const type = "part";
 
 export function getConfig() {
   return [
-  {
-    argument: "name",
-    type: "string",
-    message: "Enter name (no spaces)",
-    validate: util.VALIDATORS.nospace
-  }, {
-    argument: "displayName",
-    type: "phrase",
-    message: "Enter displayName"
-  }
-];
+    {
+      argument: "name",
+      type: "string",
+      message: "Enter name (no spaces)",
+      validate: util.VALIDATORS.nospace
+    }, {
+      argument: "displayName",
+      type: "phrase",
+      message: "Enter displayName"
+    }
+  ];
 }
 
 export function run(config) {
@@ -40,7 +40,7 @@ export function run(config) {
     };
 
     // Render templates
-    util.renderTemplate(type, "xml", model, `${targetDirectory}/${name}.xml`);
+    util.renderTemplate(type, "yaml", model, `${targetDirectory}/${name}.yaml`);
     util.renderTemplate(type, "es6", model, `${targetDirectory}/${name}.es6`);
     util.renderTemplate(type, "ftl", model, `${targetDirectory}/${name}.ftl`);
 
