@@ -34,7 +34,6 @@ export default defineConfig([
       "prefer-destructuring": "off",
       radix: ["error", "as-needed"],
       "no-plusplus": "off",
-      "no-unused-vars": "off",
       "no-useless-assignment": "off",
       "no-unassigned-vars": "off",
       "preserve-caught-error": "off"

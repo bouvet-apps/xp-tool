@@ -10,6 +10,7 @@ import chalk from "chalk";
 import { tasks } from "./tasks.js";
 import { getLanguages, printHeader } from "./lib/util/index.js";
 
+// eslint-disable-next-line no-unused-vars
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json");
