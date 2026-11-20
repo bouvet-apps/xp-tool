@@ -15,6 +15,7 @@
   "scripts": {
     "start": "node xptool.js",
     "lint": "eslint .",
+    "test": "node --test",
     "prepublishOnly": "node prepublish.js"
   },
   "dependencies": {
