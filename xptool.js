@@ -10,6 +10,7 @@ import chalk from "chalk";
 import { tasks } from "./tasks.js";
 import { getLanguages, printHeader } from "./lib/util/index.js";
 
+// eslint-disable-next-line no-unused-vars
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json");
@@ -116,7 +117,6 @@ if (args.help) {
 
   if (validateAction(type, action) && validateType(type)) {
     const taskDescriptor = tasks[type].filter(t => t.action === action)[0].descriptor;
-    /* eslint-disable-next-line no-prototype-builtins */
     if ("description" in taskDescriptor) {
       console.log(marked.parse(taskDescriptor.description));
     } else {
@@ -205,10 +205,10 @@ async function main() {
 
         config.verbose = verbose;
         config.args = args;
-        task.run(config);
+        await task.run(config);
       } else {
         const config = { verbose: verbose, args: args };
-        task.run(config);
+        await task.run(config);
       }
     }
   } catch (err) {
