@@ -21,7 +21,7 @@ export function run() {
 }
 
 function generateServiceUrl(service) {
-  const properties = propertiesReader(path.join(util.CODE_DIR, "gradle.properties"));
+  const properties = propertiesReader({ sourceFile: path.join(util.CODE_DIR, "gradle.properties") });
   const appId = properties.get("appName");
 
   const url = `_/service/${appId}/${service.name}`;
