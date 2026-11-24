@@ -1,6 +1,6 @@
 # Development
 
-**Requires Node.js >= 22.**
+**Requires Node.js 22.22.0 or later in 22.x, or 24.11.0 and later.**
 
 To start developing in xp-tool, install dependencies with `npm ci --ignore-scripts` (if you update packages in package.json, run `npm install --ignore-scripts`), and run this version with `npm start` to test your code.
 

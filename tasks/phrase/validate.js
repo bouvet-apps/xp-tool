@@ -40,18 +40,18 @@ function analyze(cfg) {
   languages.forEach((language) => {
     missing[language.code] = [];
 
-    const properties = propertiesReader(`${PHRASES_DIR}/${language.filename}`);
+    const properties = propertiesReader({ sourceFile: `${PHRASES_DIR}/${language.filename}` });
 
-    properties.each((key) => {
+    for (const [key] of properties.entries()) {
       if (!phrases.includes(key)) {
         phrases.push(key);
       }
-    });
+    }
   });
 
   // Check consistency for each language
   languages.forEach((language) => {
-    const properties = propertiesReader(`${PHRASES_DIR}/${language.filename}`);
+    const properties = propertiesReader({ sourceFile: `${PHRASES_DIR}/${language.filename}` });
 
     phrases.forEach((key) => {
       if (!properties.get(key)) {
